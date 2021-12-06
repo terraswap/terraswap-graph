@@ -23,10 +23,16 @@ export function init(
   })
 }
 
-export function errorHandler(error?: Error): void {
+export function errorHandlerWithSentry(error?: Error): void {
   if (error) {
     logger.error(error)
     sentry.captureException(error)
+  }
+}
+
+export function errorHandler(error?: Error): void {
+  if (error) {
+    logger.error(error)
   }
 }
 

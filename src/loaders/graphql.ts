@@ -40,7 +40,7 @@ export async function initGraphQL(app: Koa): Promise<void> {
 
   await server.start()
 
-  server.applyMiddleware({ app, path: '/graphql' })
+  server.applyMiddleware({ app, path: '/' })
 }
 
 export async function finalizeGraphQL(): Promise<void> {

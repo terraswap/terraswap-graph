@@ -1,6 +1,6 @@
 import { EntityManager, getManager } from 'typeorm'
 import { delay } from 'bluebird'
-import { getBlock, getLatestBlock, getOracleExchangeRate } from 'lib/terra'
+import { getTxsByHeight, getLatestBlock, getOracleExchangeRate } from 'lib/terra'
 import { errorHandler } from 'lib/error'
 import * as logger from 'lib/logger'
 import { getCollectedBlock, updateBlock } from './block'
@@ -11,7 +11,7 @@ import { updateTerraswapData } from './indexer/transferUpdater'
 
 const columbus4EndHeight = 4_724_000
 
-const chainId = process.env.TERRA_CHAIN_ID 
+const chainId = process.env.TERRA_CHAIN_ID
 
 export async function collect(
   pairList: Record<string, boolean>,
@@ -46,18 +46,18 @@ export async function collect(
     return
   }
 
-  for (let height = lastHeight + 1; height <= latestBlock; height ++) {
-    const block = await getBlock(height).catch(errorHandler)
-    if (!block) return
+  for (let height = lastHeight + 1; height <= latestBlock; height++) {
+    const txs = await getTxsByHeight(height).catch(errorHandler)
+    if (!txs) return
 
     if (height % 100 === 0){
       exchangeRate = await getOracleExchangeRate(height)
     }
 
     await getManager().transaction(async (manager: EntityManager) => {
-      if (!(latestBlock === lastHeight && block[0] === undefined)) {
-        if(block[0] !== undefined){
-          await runIndexers(manager, block, exchangeRate, pairList, tokenList)
+      if (!(latestBlock === lastHeight && txs[0] === undefined)) {
+        if(txs[0] !== undefined){
+          await runIndexers(manager, txs, exchangeRate, pairList, tokenList)
           height % 100 === 0 && await updateTerraswapData(manager)
         }
         await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))

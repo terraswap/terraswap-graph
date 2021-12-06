@@ -8,9 +8,6 @@ import { Cycle } from 'types'
 import { TokenService } from './TokenService'
 import { PairData, PairHistoricalData, Transaction, Token } from 'graphql/schema'
 import { num } from 'lib/num'
-import { whiteList } from 'assets/whiteList'
-
-const whiteListPair: { [key: string]: string } = whiteList.pair
 
 @Service()
 export class PairDataService {
@@ -36,9 +33,7 @@ export class PairDataService {
     if (!pairs){
       pairs = []
       for (const pairInfo of pairsInfo) {
-        if(whiteListPair[pairInfo.pair]){
           pairs.push(pairInfo.pair)
-        }
       }
     }
 
@@ -107,7 +102,7 @@ export class PairDataService {
       where: { pair }
     })
 
-    if (!pairInfo || !whiteListPair[pair]) return undefined
+    if (!pairInfo) return undefined
 
     // pair: lpToken
     const lpToken = pairInfo.lpToken

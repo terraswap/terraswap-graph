@@ -7,6 +7,10 @@ export function createNativeTransferLogFinders(): ReturningLogFinderMapper<
   NativeTransferTransformed[]
 > {
   return createReturningLogFinder(logRules.nativeTransferRule(), (_, match) => {
+    if (!match[2].value) {
+      console.log(match)
+      return
+    }
     const assetsInfo = trimAssets(match[2].value, true)
     return assetsInfo.map((asset) => {
       return {

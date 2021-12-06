@@ -5,9 +5,7 @@ import { Repository } from 'typeorm'
 import { InjectRepository } from 'typeorm-typedi-extensions'
 import { TokenInfoEntity } from 'orm'
 import { Token } from 'graphql/schema'
-import { whiteList } from 'assets/whiteList'
 
-const whiteListToken: { [key: string]: string } = whiteList.token
 
 @Service()
 export class TokenService {
@@ -19,7 +17,7 @@ export class TokenService {
   async getToken(token: string, repo = this.repo): Promise<Token> {
     const tokenInfo = await repo.findOne({ where: { tokenAddress: token } })
 
-    if (!tokenInfo || !whiteListToken[token]) return undefined
+    if (!tokenInfo) return undefined
 
     return {
       tokenAddress: token,
@@ -34,9 +32,7 @@ export class TokenService {
       tokens = []
       const tokenInfos = await this.getAllTokensData()
       for (const tokenInfo of tokenInfos) {
-        if (whiteListToken[tokenInfo.tokenAddress]){
-          tokens.push(tokenInfo.tokenAddress)
-        }
+        tokens.push(tokenInfo.tokenAddress)
       }
     }
 

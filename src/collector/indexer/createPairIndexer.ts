@@ -4,7 +4,6 @@ import { addTokenInfo, addPairInfo } from './createPairUpdater'
 import { updateOrAddTxns } from './txHistoryUpdater'
 import { ReturningLogFinderResult } from '@terra-money/log-finder'
 
-
 export async function CreatePairIndexer(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>,

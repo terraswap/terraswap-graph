@@ -7,6 +7,7 @@ import {
   PairInfoEntity,
   TxHistoryEntity,
   Recent24hEntity,
+  PairWeekDataEntity,
 } from 'orm'
 import { Cycle, ExchangeRate, TxHistoryTransformed } from 'types'
 import { isNative, addMinus, stringToDate, isTokenOrderedWell, compareLiquidity } from 'lib/utils'
@@ -20,6 +21,7 @@ export async function updateTxns(
 ): Promise<void> {
   await updateOrAddTxns(Cycle.HOUR, timestamp, manager, pair)
   await updateOrAddTxns(Cycle.DAY, timestamp, manager, pair)
+  await updateOrAddTxns(Cycle.WEEK, timestamp, manager, pair)
 }
 
 export async function updateVolume(
@@ -29,6 +31,7 @@ export async function updateVolume(
 ): Promise<void> {
   await updatePairVolume(Cycle.HOUR, manager, transformed, exchangeRate)
   await updatePairVolume(Cycle.DAY, manager, transformed, exchangeRate)
+  await updatePairVolume(Cycle.WEEK, manager, transformed, exchangeRate)
 }
 
 export async function updateVolume24h(
@@ -55,12 +58,7 @@ export async function updateVolume24h(
       token1Volume: isRightOrder
         ? Math.abs(Number(transformed.assets[1].amount)).toString()
         : Math.abs(Number(transformed.assets[0].amount)).toString(),
-      volumeUst: await changeVolumeAsUST(
-        manager,
-        new Date(timestamp),
-        transformed,
-        exchangeRate
-      ),
+      volumeUst: await changeVolumeAsUST(manager, new Date(timestamp), transformed, exchangeRate),
     })
   )
 }
@@ -127,7 +125,11 @@ export async function updateOrAddTxns(
   pair: string
 ): Promise<PairDataEntity | void> {
   const pairRepo = manager.getRepository(
-    cycle === Cycle.HOUR ? PairHourDataEntity : PairDayDataEntity
+    cycle === Cycle.HOUR
+      ? PairHourDataEntity
+      : cycle === Cycle.DAY
+      ? PairDayDataEntity
+      : PairWeekDataEntity
   )
 
   const lastPairData = await pairRepo.findOne({
@@ -221,7 +223,11 @@ async function updatePairVolume(
   exchangeRate: ExchangeRate | undefined
 ): Promise<PairDataEntity | void> {
   const pairRepo = manager.getRepository(
-    cycle === Cycle.HOUR ? PairHourDataEntity : PairDayDataEntity
+    cycle === Cycle.HOUR
+      ? PairHourDataEntity
+      : cycle === Cycle.DAY
+      ? PairDayDataEntity
+      : PairWeekDataEntity
   )
 
   const pair = transformed.pair

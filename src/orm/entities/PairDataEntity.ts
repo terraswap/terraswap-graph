@@ -47,6 +47,9 @@ export class PairDataEntity {
   txns: number
 }
 
+@Entity('pair_week_data')
+export class PairWeekDataEntity extends PairDataEntity {}
+
 @Entity('pair_day_data')
 export class PairDayDataEntity extends PairDataEntity {}
 

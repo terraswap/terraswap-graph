@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import * as bluebird from 'bluebird'
 import { initORM } from 'orm'
-import { init as initErrorHandler, errorHandler } from 'lib/error'
+import { init as initErrorHandler, errorHandler, errorHandlerWithSentry } from 'lib/error'
 import * as logger from 'lib/logger'
 import { initMantle } from 'lib/terra'
 import { validateConfig } from 'config'
@@ -18,7 +18,7 @@ async function loop(
   tokenList: Record<string, boolean>
 ): Promise<void> {
   for (;;) {
-    await collect(pairList, tokenList)
+    await collect(pairList, tokenList).catch(errorHandlerWithSentry)
     await bluebird.delay(500)
   }
 }
