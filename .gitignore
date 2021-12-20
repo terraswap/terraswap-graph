@@ -13,5 +13,8 @@ node_modules/
 
 # typeorm
 *ormconfig*
+ormlogs.log
 
 *.DS_Store
+
+.vscode

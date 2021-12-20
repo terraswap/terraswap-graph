@@ -8,11 +8,11 @@ COPY package.json package-lock.json ./
 RUN npm ci --prod
 
 FROM node:lts-alpine
-
+RUN apk add --no-cache git
 WORKDIR /app
 
 COPY --from=builder /app .
 COPY . .
 
 ENTRYPOINT ["npm", "run"]
-CMD ["start"]
+CMD ["dashboard"]

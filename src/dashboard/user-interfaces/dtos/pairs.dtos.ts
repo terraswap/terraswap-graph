@@ -1,8 +1,26 @@
-import { LiquidityDto, PairDto, PairsDto, VolumeDto } from 'dashboard/services/dtos/pairs.dtos'
+import { IsString, Length, Validate } from 'class-validator'
+import {
+  LiquidityDto,
+  PairDto,
+  PairRecentDataDto,
+  PairsDto,
+  VolumeDto,
+} from 'dashboard/services/dtos/pairs.dtos'
 import { ApiResponseProperty } from '../decorators/api-property.decorator'
-import { TokenResponse } from './dtos'
+import { TokenResponse } from './tokens.dtos'
 
-import { Volume24hResponse } from './dtos'
+import { Volume24hResponse } from './tokens.dtos'
+
+
+export class PairsParam {
+  @IsString()
+  @Validate((pairAddress: string)=>{
+    return pairAddress.startsWith('terra1')
+  })
+  @Length(44,44)
+  pairAddress: string
+}
+
 
 export type PairsResponses = PairsResponse[]
 export class PairsResponse extends PairsDto {
@@ -122,4 +140,39 @@ export class PairResponse extends PairDto {
     maxItems: 50,
   })
   liquidities: LiquidityResponse[]
+}
+
+export class PairRecentCycleResponse {
+  @ApiResponseProperty({ example: '110079649300112', type: String })
+  volume: string
+
+  @ApiResponseProperty({ example: '0.234', type: String })
+  volumeIncreasedRate: string
+
+  @ApiResponseProperty({ example: '1307281629942463', type: String })
+  liquidity: string
+
+  @ApiResponseProperty({ example: '0.34', type: String })
+  liquidityIncreasedRate: string
+
+  @ApiResponseProperty({ example: '330238947900', type: String })
+  fee: string
+
+  @ApiResponseProperty({ examples: ['0.24832', 'Infinity'], type: String })
+  feeIncreasedRate: string
+
+  @ApiResponseProperty({ example: '5667522', type: Number })
+  height: number
+
+  @ApiResponseProperty({ example: '2021-12-14T02:00:00.000Z' })
+  timestamp: Date 
+
+}
+
+export class PairRecentDataResponse extends PairRecentDataDto {
+  @ApiResponseProperty({ type: PairRecentCycleResponse })
+  daily: PairRecentCycleResponse
+
+  @ApiResponseProperty({ type: PairRecentCycleResponse })
+  weekly: PairRecentCycleResponse
 }

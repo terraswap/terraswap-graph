@@ -2,7 +2,13 @@ import { Get, Param } from '@nestjs/common'
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { DashboardPairsService } from 'dashboard/services/pairs.service'
 import { MyController } from '../decorators/controller.decorator'
-import { PairResponse, PairsResponse, PairsResponses } from '../dtos/pairs.dtos'
+import {
+  PairRecentDataResponse,
+  PairResponse,
+  PairsParam,
+  PairsResponse,
+  PairsResponses,
+} from '../dtos/pairs.dtos'
 
 @MyController('/pairs')
 @ApiTags('dashboard')
@@ -19,6 +25,14 @@ export class PairsController {
         pairAlias: `${dto.token0Symbol}-${dto.token1Symbol}`,
       }
     })
+  }
+
+  @Get('/:pairAddress/recent')
+  @ApiResponse({ type: PairRecentDataResponse })
+  async getRecentDataOfPair(
+    @Param() dto: PairsParam
+  ): Promise<PairRecentDataResponse> {
+    return await this.service.getRecentData(dto.pairAddress)
   }
 
   @Get('/:address')

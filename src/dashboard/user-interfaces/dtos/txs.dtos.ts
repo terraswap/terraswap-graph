@@ -1,7 +1,14 @@
 import { Type } from 'class-transformer'
-import { IsNumber, IsOptional, IsString, Length } from 'class-validator'
+import { IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator'
 import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { ApiResponseProperty } from '../decorators/api-property.decorator'
+
+export class TxParam {
+  @IsString()
+  @Length(64,64)
+  txHash:string
+
+}
 
 export class TxsQuery {
   @IsOptional()
@@ -10,12 +17,17 @@ export class TxsQuery {
   pair: string
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(10000)
   @Type(() => Number)
   page: number
 }
 
 export class TxResponse {
+  @ApiResponseProperty({example: '1923342'})
+  id: number
+
   @ApiResponseProperty({ description: 'timestamp for the tx', example: '2021-11-10 09:41:02.774' })
   timestamp: number
 
