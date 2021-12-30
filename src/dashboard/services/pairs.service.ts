@@ -72,12 +72,12 @@ export class DashboardPairsService {
     return pairDto
   }
 
-  @memoize({ promise: true, maxAge: 1 * 60 * 1000 })
+  @memoize({ promise: true, maxAge: 10 * 1000 })
   async getRecentData(pairAddress: string): Promise<PairRecentDataDto> {
-    const syncInfo = await this.repo.getSyncedBlockAndTimestamp(pairAddress)
+    const syncInfo = await this.repo.getSyncedBlockAndTimestamp()
 
     if (!syncInfo) {
-      throw new NotFoundException()
+      throw new NotFoundException(`Data is not synced`)
     }
     const latestTimestamp = floorTimestamp(syncInfo.timestamp.getTime(), Cycle.HOUR)
 

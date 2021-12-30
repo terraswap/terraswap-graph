@@ -21,7 +21,7 @@ export class DashboardTerraswapService {
     return await this.repo.getTerraswapData(from, to)
   }
 
-  @memoize({ promise: true, maxAge: 3 * 60 * 1000 })
+  @memoize({ promise: true, maxAge: 10 * 1000 })
   async getTerraswapRecentData(): Promise<TerraswapRecentDataDto> {
     const syncInfo = await this.repo.getSyncedBlockAndTimestamp()
 

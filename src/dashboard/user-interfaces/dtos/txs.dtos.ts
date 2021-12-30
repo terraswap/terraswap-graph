@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import { IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator'
+import { IsEnum, IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator'
 import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { ApiResponseProperty } from '../decorators/api-property.decorator'
 
@@ -17,11 +17,8 @@ export class TxsQuery {
   pair: string
 
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(10000)
-  @Type(() => Number)
-  page: number
+  @IsEnum(TerraswapAction)
+  action: TerraswapAction
 }
 
 export class TxResponse {
@@ -48,7 +45,7 @@ export class TxResponse {
 }
 
 export class TxsResponse {
-  @ApiResponseProperty({ example: 256 })
+  @ApiResponseProperty({ example: 256 , deprecated: true})
   totalCount: number
 
   @ApiResponseProperty({ type: [TxResponse] })

@@ -166,15 +166,12 @@ export class DashboardPairsRepository {
     }
   }
 
-  async getSyncedBlockAndTimestamp(pairAddress: string): Promise<PairsSyncedInfo | undefined> {
+  async getSyncedBlockAndTimestamp(): Promise<PairsSyncedInfo | undefined> {
     try {
       const manager = getManager()
       const bEntity = await manager.getRepository(BlockEntity).findOne({ select: ['height'] })
       const pEntity = await manager.getRepository(PairHourDataEntity).findOne({
         select: ['timestamp'],
-        where: {
-          pair: pairAddress,
-        },
         order: {
           timestamp: 'DESC',
         },

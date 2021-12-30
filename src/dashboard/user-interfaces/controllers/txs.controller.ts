@@ -1,5 +1,6 @@
 import { Get, Param, Query } from '@nestjs/common'
 import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { DashboardTxsService } from 'dashboard/services/txs.service'
 import { MyController } from '../decorators/controller.decorator'
 import { TxParam, TxResponse, TxsQuery, TxsResponse } from '../dtos/txs.dtos'
@@ -16,11 +17,15 @@ export class TxsController {
     name: 'pair',
     description: 'pair address, length 44',
     example: 'terra14fyt2g3umeatsr4j4g2rs8ca0jceu3k0mcs7ry',
+    required: false
   })
-  @ApiQuery({ name: 'page', description: 'page number', required: false, example: 10 })
+  @ApiQuery({
+    name: 'action',
+    required: false,
+    enum: TerraswapAction,
+  })
   async getPairTxs(@Query() query: TxsQuery): Promise<TxsResponse> {
-    const pageOffset = query.page ? Number(query.page) - 1 : 0
-    return this.service.getTxs(query.pair, pageOffset)
+    return this.service.getTxs(query.pair,  query.action)
   }
 
   @Get('/:txHash')

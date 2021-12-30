@@ -5,19 +5,21 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common'
+import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { TxHistoryEntity } from 'orm'
 import { getManager, getRepository } from 'typeorm'
 import { TXS_PAGINATED_COUNT } from './defined'
 
 @Injectable()
 export class DashboardTxsRepository {
-  async getTxsOfPair(pair: string, page = 0): Promise<any> {
+  async getTxsOfPair(pair?: string, action?: TerraswapAction): Promise<any> {
     const repo = getManager().getRepository(TxHistoryEntity)
 
     try {
       const ret: any = {}
-      ret.txs = await repo
-        .createQueryBuilder('t')
+      const qb = repo.createQueryBuilder('t')
+
+      let query = qb
         .select('t.pair', 'pairAddress')
         .addSelect('t.timestamp', 'timestamp')
         .addSelect('t.tx_hash', 'txHash')
@@ -25,13 +27,18 @@ export class DashboardTxsRepository {
         .addSelect('t.token0Amount', 'token0Amount')
         .addSelect('t.token1Amount', 'token1Amount')
         .addSelect('t.id', 'id')
-        .where('t.pair=:pair', { pair })
-        .orderBy('t.id', 'DESC')
-        .skip(TXS_PAGINATED_COUNT * page)
-        .take(TXS_PAGINATED_COUNT)
-        .execute()
+        
+      if (pair) {
+        query = query.andWhere('t.pair=:pair', { pair })
+      }
+      if (action) {
+        query = query.andWhere('t.action =:action', { action })
+      }
 
-      ret.totalCount = await repo.count({ where: { pair } })
+      ret.txs = await query.orderBy('t.id', 'DESC').limit(TXS_PAGINATED_COUNT).execute()
+
+      ret.totalCount = ret.txs?.length || 0 
+
       return ret
     } catch (err: any) {
       Logger.warn(`getTerraswapRecentData err:${err.stack ? err.stack : err}`)
