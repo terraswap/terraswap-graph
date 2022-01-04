@@ -1,58 +1,23 @@
 import { gql } from 'graphql-request'
 import { Tx } from 'types'
+import { getLatestBlockHeight } from './lcd'
 import { mantle } from './mantle'
+import { mantleMint } from './mantlemint'
 
 interface querier {
   getTxsByHeight(height: number): Promise<Tx[]>
   getLatestBlock(): Promise<number>
-  getTxsQuery: () => string
-  getLatestBlockQuery: () => string
 }
 
 const bombayQuerier = {
   async getTxsByHeight(height: number): Promise<Tx[]> {
-    const range = [height, height]
-    const response = await mantle.request(this.getTxsQuery(), { range })
-    return response.Blocks[0]?.Txs
+    const response = await mantleMint.get(`/index/tx/by_height/${height}`)
+    return JSON.parse(response.data)
   },
 
   async getLatestBlock(): Promise<number> {
-    const response = await mantle.request(this.getLatestBlockQuery())
-    return Number(response?.LastSyncedHeight)
+    return await getLatestBlockHeight()
   },
-
-  getTxsQuery: () => gql`
-    query ($range: [Int!]!) {
-      Blocks(Height_range: $range) {
-        Txs {
-          Height
-          TxHash
-          TimestampUTC
-          Logs {
-            Events {
-              Type
-              Attributes {
-                Key
-                Value
-              }
-            }
-          }
-          Tx {
-            Msg {
-              Type
-              Value
-            }
-          }
-        }
-      }
-    }
-  `,
-
-  getLatestBlockQuery: () => gql`
-    {
-      LastSyncedHeight
-    }
-  `,
 }
 
 const mainnetQuerier = {

@@ -35,6 +35,11 @@ export async function addTokenInfo(
 
     return tokenRepo.save(tokenInfo)
   } else {
+    if (token.pairs.find((v)=> {
+      return v === newPair
+    })) {
+      return 
+    }
     token.pairs = token.pairs.concat([newPair])
     return tokenRepo.save(token)
   }

@@ -28,7 +28,7 @@ export async function TxHistoryIndexer(
         await updateLpTokenShare(Cycle.DAY, manager, transformed)
         await updateLpTokenShare(Cycle.HOUR, manager, transformed)
       }
-      await addTxHistory(manager, timestamp, txHash, transformed) // tx history entithy
+      await addTxHistory(manager, timestamp, txHash, transformed) // tx history entity
     }
   }
   

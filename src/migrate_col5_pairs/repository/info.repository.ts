@@ -6,9 +6,8 @@ import * as https from 'https';
 import { PoolInfoDto } from '../dtos'
 
 const lcdUrl = process.env.TERRA_LCD || 'https://lcd.terra.dev'
-const wasmBasePath = `/wasm/contracts/pairAddress/store?query_msg={"pool":{}}`
+const wasmBasePath = `/terra/wasm/v1beta1/contracts/pairAddress/store?query_msg=eyJwb29sIjp7fX0=`
 const blockBasePath = `/blocks/height`
-const lunaUsdPair = 'terra1tndcaqxkpc5ce9qee5ggqf430mr2z3pefe5wj6'
 const lcdClient = axios.create({
   baseURL: lcdUrl, 
   httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5*1000 }),
@@ -17,10 +16,9 @@ const lcdClient = axios.create({
 })
 
 export async function getLatestBlockHeight(): Promise<number> {
-  const path = wasmBasePath.replace('pairAddress', lunaUsdPair)
   try {
-    const res = await await lcdClient.get(path)
-    return parseInt(res.data.height)
+    const res = await await lcdClient.get(`/blocks/latest`)
+   return parseInt(res.data.block.header.height)
   } catch (err) {
     console.log(err)
     throw new Error(`cannot get latest block height`)
@@ -30,7 +28,7 @@ export async function getLatestBlockHeight(): Promise<number> {
 export async function getPoolInfo(pairAddress: string, height?: number): Promise<PoolInfoDto> {
   let path = wasmBasePath.replace('pairAddress', pairAddress)
   if (height) {
-    path = path + `&&height=${height}`
+    path = path + `&height=${height}`
   }
   try {
     const res = await lcdClient.get(path)

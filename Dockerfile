@@ -6,6 +6,7 @@ RUN apk add --no-cache make gcc g++ python3
 COPY package.json package-lock.json ./
 
 RUN npm ci --prod
+RUN npm i --save-dev ts-node
 
 FROM node:lts-alpine
 RUN apk add --no-cache git

@@ -9,6 +9,7 @@ import { collect } from './collect'
 import config from 'config'
 import { getManager } from 'typeorm'
 import { getPairList, getTokenList } from './indexer/common'
+import initMantleMint from 'lib/terra/mantlemint'
 
 bluebird.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -32,7 +33,16 @@ async function main(): Promise<void> {
 
   await initORM()
 
-  initMantle(process.env.TERRA_MANTLE)
+  const chainId = process.env.TERRA_CHAIN_ID
+
+  if (chainId.startsWith('col')) {
+    initMantle(process.env.TERRA_MANTLE)
+  } 
+  
+  if(chainId.startsWith('bombay')) {
+    initMantleMint(process.env.TERRA_MANTLE_MINT)
+  }
+
 
   const manager = getManager()
 

@@ -20,7 +20,6 @@ export async function updateTxns(
 ): Promise<void> {
   await updateOrAddTxns(Cycle.HOUR, timestamp, manager, pair)
   await updateOrAddTxns(Cycle.DAY, timestamp, manager, pair)
-  await updateOrAddTxns(Cycle.WEEK, timestamp, manager, pair)
 }
 
 export async function updateVolume(
@@ -30,7 +29,6 @@ export async function updateVolume(
 ): Promise<void> {
   await updatePairVolume(Cycle.HOUR, manager, transformed, exchangeRate)
   await updatePairVolume(Cycle.DAY, manager, transformed, exchangeRate)
-  await updatePairVolume(Cycle.WEEK, manager, transformed, exchangeRate)
 }
 
 export async function updateVolume24h(

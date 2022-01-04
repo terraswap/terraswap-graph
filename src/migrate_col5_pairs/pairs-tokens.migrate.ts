@@ -3,6 +3,7 @@ import { isTokenOrderedWell } from 'lib/utils'
 import { PairInfoEntity, TokenInfoEntity } from 'orm'
 
 import { EntityManager, getConnection } from 'typeorm'
+import { TERRA_CHAIN_ID } from './main'
 
 function setPairs(token: string, pair: string, tokenToPairMap: Map<string, string[]>) {
 
@@ -16,11 +17,11 @@ function getAssetId(assetInfo: any) {
 }
 
 async function loadPairs() {
-  return JSON.parse(fs.readFileSync(`${__dirname}/mainnet-pairs.json`).toString())
+  return JSON.parse(fs.readFileSync(`${__dirname}/${TERRA_CHAIN_ID}-pairs.json`).toString())
 }
 
 async function loadTokens() {
-  return JSON.parse(fs.readFileSync(`${__dirname}/mainnet-tokens.json`).toString())
+  return JSON.parse(fs.readFileSync(`${__dirname}/${TERRA_CHAIN_ID}-tokens.json`).toString())
 }
 
 export async function migrateData(): Promise<void> {
@@ -31,7 +32,7 @@ export async function migrateData(): Promise<void> {
     const tokenRepo = manager.getRepository(TokenInfoEntity)
     const tokenToPairMap: Map<string, string[]> = new Map<string, string[]>()
 
-    const pairEntities = pairs.map((p: any) => {
+    const pairEntities: PairInfoEntity[] = pairs.map((p: any) => {
       const assets = [getAssetId(p.asset_infos[0]), getAssetId(p.asset_infos[1])]
       const token0 = isTokenOrderedWell(assets) ? assets[0] : assets[1]
       const token1 = isTokenOrderedWell(assets) ? assets[1] : assets[0]

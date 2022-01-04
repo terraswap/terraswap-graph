@@ -13,12 +13,12 @@ export interface AssetInfoDto {
 }
 
 export interface PoolInfoDto {
-  height: number
-  result: {
+  query_result: {
     assets: AssetInfoDto[]
     total_share: string
   }
   timestamp?: Date
+  height?: number
 }
 
 export function getAssetId(asset: Asset) {
