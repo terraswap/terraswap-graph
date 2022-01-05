@@ -49,8 +49,8 @@ async function findFirstAppearance(pair: string, latestHeight: number) {
     return
   }
   let retry = 3
-  while (!res?.timestamp && retry) {
-    res.timestamp = await getBlockTime(l)
+  while (!res?.datetimeString && retry) {
+    res.datetimeString = await getBlockTime(l)
     retry--
   }
   if (!retry) {
@@ -94,7 +94,7 @@ export async function migratePairsInfo() {
         token1: getAssetId(token1.info),
         token1Reserve: token1.amount,
       },
-      poolInfo.timestamp.toString(),
+      poolInfo.datetimeString,
       exchangeRate
     )
     const entity = new PairDataEntity({
@@ -109,7 +109,7 @@ export async function migratePairsInfo() {
       volumeUst: '0',
       liquidityUst: liquidity,
       txns: 1,
-      timestamp: poolInfo.timestamp,
+      timestamp: new Date(poolInfo.datetimeString),
     })
 
     const cycles = [Cycle.HOUR, Cycle.DAY]

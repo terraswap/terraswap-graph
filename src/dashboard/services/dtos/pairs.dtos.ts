@@ -89,7 +89,11 @@ export class PairDto {
 
   liquidities: LiquidityDto[]
 }
+export class PairVolumeDto {
+  pairAddress: string
 
+  volume: string
+}
 export class VolumeDto {
   timestamp: Date
 
@@ -125,7 +129,7 @@ export class PairRecentCycleDto {
   height: number
 
   @IsDateString()
-  timestamp: Date 
+  timestamp: Date
 }
 export class PairRecentDataDto {
   daily: PairRecentCycleDto
@@ -146,5 +150,5 @@ export class PairsSyncedInfo {
   height: number
 
   @IsDateString()
-  timestamp: Date 
+  timestamp: Date
 }

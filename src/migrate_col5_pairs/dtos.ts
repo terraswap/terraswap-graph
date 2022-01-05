@@ -17,10 +17,10 @@ export interface PoolInfoDto {
     assets: AssetInfoDto[]
     total_share: string
   }
-  timestamp?: Date
+  datetimeString?: string
   height?: number
 }
 
-export function getAssetId(asset: Asset) {
+export function getAssetId(asset: Asset): string {
   return asset.native_token ? asset.native_token.denom : asset.token.contract_addr
 }

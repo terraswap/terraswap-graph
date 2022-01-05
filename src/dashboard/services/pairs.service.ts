@@ -13,6 +13,7 @@ import {
   PairsDto,
   PairsDtos,
   PairsSyncedInfo,
+  PairVolumeDto,
 } from './dtos/pairs.dtos'
 import { floorTimestamp } from './utils'
 
@@ -22,10 +23,9 @@ export class DashboardPairsService {
 
   @memoize({ promise: true, maxAge: 60000 })
   async getPairs(): Promise<PairsDtos> {
-    const dtos = await this.repo.getPairsLatestData()
     const now = Date.now()
-    const volumes = await this.repo.getLastWeekVolumes(now)
-    const liquidities = await this.repo.getLatestLiquidities(now)
+    const dtos = await this.repo.getPairsData(now)
+    const weekVolumes: PairVolumeDto[] = await this.repo.getWeekVolumes(now)
 
     const pairsDict: { [pairAddr: string]: PairsDto } = dtos.reduce(function (dict: any, obj) {
       obj.apr = '0'
@@ -33,20 +33,18 @@ export class DashboardPairsService {
       return dict
     }, {})
 
-    const pairsWeekDict: {
-      [pairAddr: string]: { pairAddress: string; volume: string; liquidityUst: string }
-    } = volumes.reduce(function (map: any, obj) {
-      map[obj.pairAddress] = Object.assign({ totalLpTokenShare: '0' }, obj)
-      return map
-    }, {})
-    liquidities.forEach((p) => {
-      pairsWeekDict[p.pairAddress].liquidityUst = p.liquidityUst
-    })
+    const pairsWeekDict: { [pairAddr: string]: PairVolumeDto } = weekVolumes.reduce(
+      (map: any, obj) => {
+        map[obj.pairAddress] = obj
+        return map
+      },
+      {}
+    )
 
     Object.values(pairsWeekDict).forEach((obj) => {
       const pair = pairsDict[obj.pairAddress]
       if (!pair) return
-      pair.apr = this.calculateApr(obj.volume, obj.liquidityUst)
+      pair.apr = this.calculateApr(obj.volume, pair.liquidityUst)
     })
     return Object.values(pairsDict)
   }

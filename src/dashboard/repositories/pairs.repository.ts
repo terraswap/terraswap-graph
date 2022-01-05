@@ -22,8 +22,8 @@ import { pairEntity, volumesAndLiquidities } from './dtos/pairs.dtos'
 
 @Injectable()
 export class DashboardPairsRepository {
-  async getPairsLatestData(): Promise<PairsDtos> {
-    const repo = getManager().getRepository(PairDayDataEntity)
+  async getPairsData(targetTimestamp: number= Date.now()): Promise<PairsDtos> {
+    const repo = getManager().getRepository(PairHourDataEntity)
     try {
       const dtos: PairsDtos = await repo
         .createQueryBuilder('p')
@@ -48,52 +48,51 @@ export class DashboardPairsRepository {
         .addSelect('t0.decimals', 'token0Decimals')
         .addSelect('t1.decimals', 'token1Decimals')
         .execute()
-      return dtos
+
+      const pairVolumes = await repo
+        .createQueryBuilder('p')
+        .select('p.pair', 'pair')
+        .addSelect('SUM(p.volumeUst)', 'volumeUst')
+        .addSelect('SUM(p.token0Volume)', 'token0Volume')
+        .addSelect('SUM(p.token1Volume)', 'token1Volume')
+        .groupBy('p.pair')
+        .where('p.timestamp >=:from', { from: new Date(targetTimestamp - Cycle.DAY) })
+        .getRawMany()
+
+      const pairDict = dtos.reduce(function (dict: any, obj) {
+        dict[obj.pairAddress] = obj
+        return dict
+      }, {})
+
+      pairVolumes.forEach((p) => {
+        const target = pairDict[p.pair]
+        if (!target) return
+        target.volumeUst = p.volumeUst
+        target.token0Volume = p.token0Volume
+        target.token1Volume = p.token1Volume
+      })
+      return Object.values(pairDict)
     } catch (err: any) {
       Logger.warn(`getTerraswapRecentData err:${err.stack ? err.stack : err}`)
       throw new InternalServerErrorException(`internal server error`)
     }
   }
 
-  async getLastWeekVolumes(
+  async getWeekVolumes(
     targetTimeStamp: number = Date.now()
   ): Promise<{ pairAddress: string; volume: string }[]> {
     const repo = getManager().getRepository(PairDayDataEntity)
     try {
-      const lastDayTimestamp = floorTimestamp(targetTimeStamp, Cycle.DAY)
       const volumes: { pairAddress: string; volume: string }[] = await repo
         .createQueryBuilder('p')
         .groupBy('p.pair')
-        .andWhere('p.timestamp >=:from', { from: new Date(lastDayTimestamp - Cycle.WEEK) })
-        .andWhere('p.timestamp <:lastDay', { lastDay: new Date(lastDayTimestamp) })
+        .andWhere('p.timestamp >=:from', { from: new Date(targetTimeStamp - Cycle.WEEK) })
+        .andWhere('p.timestamp <:to', { to: new Date(targetTimeStamp) })
         .select('p.pair', 'pairAddress')
         .addSelect('SUM(p.volumeUst)', 'volume')
         .orderBy('p.pair', 'ASC')
         .getRawMany()
       return volumes
-    } catch (err: any) {
-      Logger.warn(`err ${err.stack ? err.stack : err}`)
-      throw new InternalServerErrorException(`internal server error`)
-    }
-  }
-
-  async getLatestLiquidities(
-    targetTimeStamp: number = Date.now()
-  ): Promise<{ pairAddress: string; liquidityUst: string }[]> {
-    const repo = getManager().getRepository(PairDayDataEntity)
-    try {
-      const lastDayTimestamp = floorTimestamp(targetTimeStamp, Cycle.DAY)
-      const liquidities: { pairAddress: string; liquidityUst: string }[] = await repo
-        .createQueryBuilder('p')
-        .distinctOn(['p.pair'])
-        .orderBy('p.pair')
-        .addOrderBy('p.timestamp', 'DESC')
-        .where('p.timestamp >=:weekAgo', { weekAgo: new Date(lastDayTimestamp - Cycle.WEEK) })
-        .andWhere('p.timestamp <:lastDay', { lastDay: new Date(lastDayTimestamp) })
-        .select('p.liquidityUst', 'liquidityUst')
-        .addSelect('p.pair', 'pairAddress')
-        .getRawMany()
-      return liquidities
     } catch (err: any) {
       Logger.warn(`err ${err.stack ? err.stack : err}`)
       throw new InternalServerErrorException(`internal server error`)
@@ -212,7 +211,7 @@ export class DashboardPairsRepository {
         .andWhere('p.pair =:pairAddress', { pairAddress })
         .getRawOne()
 
-      return entity?.volume || "0"
+      return entity?.volume || '0'
     } catch (err: any) {
       Logger.warn(`getSumOfVolumes err:${err.stack ? err.stack : err}`)
       throw new InternalServerErrorException(`internal server error`)
@@ -230,7 +229,7 @@ export class DashboardPairsRepository {
         .orderBy('p.timestamp', 'DESC')
         .limit(1)
         .getRawOne()
-        
+
       return entity?.liquidity || '0'
     } catch (err: any) {
       Logger.warn(`getTvl err:${err.stack ? err.stack : err}`)
