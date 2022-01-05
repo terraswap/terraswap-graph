@@ -15,7 +15,7 @@ import {
   Recent24hEntity,
   TokenInfoEntity,
 } from 'orm'
-import { getConnection, getManager, getRepository, LessThanOrEqual } from 'typeorm'
+import { getConnection, getManager, getRepository } from 'typeorm'
 import { Cycle } from 'types'
 import { PAIR_DATA_MAX_DAY_RANGE } from './defined'
 import { pairEntity, volumesAndLiquidities } from './dtos/pairs.dtos'
@@ -227,6 +227,7 @@ export class DashboardPairsRepository {
         .from(PairHourDataEntity, 'p')
         .where('p.pair = :pairAddress', { pairAddress })
         .andWhere('p.timestamp <=:targetTime', { targetTime })
+        .orderBy('p.timestamp', 'DESC')
         .limit(1)
         .getRawOne()
         
