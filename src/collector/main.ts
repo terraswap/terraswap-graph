@@ -9,7 +9,7 @@ import { collect } from './collect'
 import config from 'config'
 import { getManager } from 'typeorm'
 import { getPairList, getTokenList } from './indexer/common'
-import initMantleMint from 'lib/terra/mantlemint'
+import initRpc from 'lib/terra/rpc'
 
 bluebird.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -40,7 +40,7 @@ async function main(): Promise<void> {
   } 
   
   if(chainId.startsWith('bombay')) {
-    initMantleMint(process.env.TERRA_MANTLE_MINT)
+    initRpc(process.env.TERRA_RPC)
   }
 
 

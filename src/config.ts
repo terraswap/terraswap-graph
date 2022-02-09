@@ -3,7 +3,7 @@ const { SERVER_PORT } = process.env
 export function validateConfig(): void {
   const keys = ['TERRA_LCD', 'TERRA_CHAIN_ID']
   const mantle = 'TERRA_MANTLE'
-  const mantleMint = 'TERRA_MANTLE_MINT'
+  const rpc = 'TERRA_RPC'
   for (const key of keys) {
     if (!process.env[key]) {
       throw new Error(`process.env.${key} is missing`)
@@ -17,8 +17,8 @@ export function validateConfig(): void {
   }
 
   if (process.env.TERRA_CHAIN_ID.startsWith('bombay')) {
-    if (!process.env[mantleMint]) {
-      throw new Error(`process.env.${mantleMint} is missing`)
+    if (!process.env[rpc]) {
+      throw new Error(`process.env.${rpc} is missing`)
     }
   }
 }

@@ -1,8 +1,9 @@
+import { hashToHex } from '@terra-money/terra.js'
 import { gql } from 'graphql-request'
 import { Tx } from 'types'
 import { getLatestBlockHeight } from './lcd'
 import { mantle } from './mantle'
-import { mantleMint } from './mantlemint'
+import { rpc } from './rpc'
 
 interface querier {
   getTxsByHeight(height: number): Promise<Tx[]>
@@ -11,8 +12,35 @@ interface querier {
 
 const bombayQuerier = {
   async getTxsByHeight(height: number): Promise<Tx[]> {
-    const response = await mantleMint.get(`/index/tx/by_height/${height}`)
-    return JSON.parse(response.data)
+    const block = await rpc.get(`/block`, {
+      params: { height },
+    })
+
+    const blockResults = await rpc.get(`/block_results`, {
+      params: { height },
+    })
+    const blockData = JSON.parse(block.data)
+    const txTimestamp = blockData.result.block.header.time
+
+    const blockResultsData = JSON.parse(blockResults.data)
+    const txs: Tx[] = []
+
+    blockData.result.block.data.txs.forEach((tx: any, idx: number) => {
+      const txString = typeof tx === 'string' ? tx : Buffer.from(tx).toString()
+      const txHashStr = hashToHex(txString)
+      const txResult = blockResultsData.result?.txs_results[idx]
+      let logs = []
+      if (txResult.code === 0 ) {
+        logs = JSON.parse(txResult.log)
+      }
+      txs.push({
+        height, 
+        timestamp: txTimestamp,
+        txhash:txHashStr,
+        logs
+      })
+    })
+    return txs
   },
 
   async getLatestBlock(): Promise<number> {
