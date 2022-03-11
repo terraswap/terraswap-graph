@@ -3,7 +3,6 @@ import * as bluebird from 'bluebird'
 import { initORM } from 'orm'
 import { init as initErrorHandler, errorHandler, errorHandlerWithSentry } from 'lib/error'
 import * as logger from 'lib/logger'
-import { initMantle } from 'lib/terra'
 import { validateConfig } from 'config'
 import { collect } from './collect'
 import config from 'config'
@@ -35,14 +34,7 @@ async function main(): Promise<void> {
 
   const chainId = process.env.TERRA_CHAIN_ID
 
-  if (chainId.startsWith('col')) {
-    initMantle(process.env.TERRA_MANTLE)
-  } 
-  
-  if(chainId.startsWith('bombay')) {
-    initRpc(process.env.TERRA_RPC)
-  }
-
+  initRpc(process.env.TERRA_RPC)
 
   const manager = getManager()
 

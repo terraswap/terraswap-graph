@@ -29,7 +29,7 @@
     "@sentry/node": "^6.9.0",
     "@terra-money/hive": "^0.1.0",
     "@terra-money/log-finder": "^1.1.4",
-    "@terra-money/terra.js": "^3.0.7",
+    "@terra-money/terra.js": "^3.0.8",
     "@types/eslint": "^7.28.0",
     "apollo-server-koa": "^3.0.2",
     "axios": "^0.24.0",
