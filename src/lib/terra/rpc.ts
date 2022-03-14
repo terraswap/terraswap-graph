@@ -3,7 +3,7 @@ import * as logger from 'lib/logger'
 
 export let rpc: Axios
 
-export default function initRpc(URL: string = process.env.TERRA_MANTLE_MINT): Axios {
+export default function initRpc(URL: string = process.env.TERRA_RPC): Axios {
   logger.info('Initialize RPC')
 
   rpc = new Axios({

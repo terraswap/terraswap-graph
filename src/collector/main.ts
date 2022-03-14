@@ -32,8 +32,6 @@ async function main(): Promise<void> {
 
   await initORM()
 
-  const chainId = process.env.TERRA_CHAIN_ID
-
   initRpc(process.env.TERRA_RPC)
 
   const manager = getManager()
