@@ -1,9 +1,14 @@
 import axios from 'axios'
 import * as http from 'http';
 import * as https from 'https';
+import { isNative } from 'lodash';
 
+interface TokenInfo {
+  symbol: string
+  decimals: number
+}
 
-const lcdUrl = process.env.TERRA_LCD || 'https://lcd.terra.dev'
+const lcdUrl = process.env.TERRA_LCD || 'https://bombay-lcd.terra.dev'
 
 const lcdClient = axios.create({
   baseURL: lcdUrl, 
@@ -14,10 +19,28 @@ const lcdClient = axios.create({
 
 export async function getLatestBlockHeight(): Promise<number> {
   try {
-    const res = await await lcdClient.get(`/blocks/latest`)
+    const res = await lcdClient.get(`/blocks/latest`)
     return parseInt(res.data.block.header.height)
   } catch (err) {
     console.log(err)
     throw new Error(`cannot get latest block height`)
   }
+}
+
+export async function getTokenInfo(address: string): Promise<TokenInfo> {
+  if (isNative(address)) {
+    return {
+      symbol: address,
+      decimals: 6,
+    }
+  }
+
+  const result = await lcdClient.get(`terra/wasm/v1beta1/contracts/${address}/store`,
+  {
+    params: {
+      query_msg: 'eyJ0b2tlbl9pbmZvIjp7fX0='
+    }
+  })
+
+  return result.data?.query_result
 }
