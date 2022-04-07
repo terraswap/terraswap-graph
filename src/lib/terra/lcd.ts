@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as http from 'http';
 import * as https from 'https';
-import { isNative } from 'lodash';
+import { isNative } from 'lib/utils';
 
 interface TokenInfo {
   symbol: string
