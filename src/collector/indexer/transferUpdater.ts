@@ -230,20 +230,20 @@ export async function updateTerraswapData(
     .getRawMany()
 
   let sum = {
-    liuqidity: 0,
+    liquidity: 0,
     volume: 0,
     txns: 0,
   }
 
   for (const data of todayData) {
-    sum.liuqidity += Number(data.liquidity_ust)
+    sum.liquidity += Number(data.liquidity_ust)
     if (data.timestamp.valueOf() === lastData[0].timestamp.valueOf()){
       sum.volume += Number(data.volume_ust)
       sum.txns += data.txns
     }
   }
 
-  lastData[0].totalLiquidityUst = sum.liuqidity.toString()
+  lastData[0].totalLiquidityUst = sum.liquidity.toString()
   lastData[0].volumeUst = sum.volume.toString()
   lastData[0].txns = sum.txns
 
@@ -260,20 +260,20 @@ export async function updateTerraswapData(
       .getRawMany()
 
     sum = {
-      liuqidity: 0,
+      liquidity: 0,
       volume: 0,
       txns: 0,
     }
 
     for (const data of lastDayData) {
-      sum.liuqidity += Number(data.liquidity_ust)
+      sum.liquidity += Number(data.liquidity_ust)
       if (data.timestamp.valueOf() === lastData[1].timestamp.valueOf()){
         sum.volume += Number(data.volume_ust)
         sum.txns += data.txns
       }
     }
 
-    lastData[1].totalLiquidityUst = sum.liuqidity.toString()
+    lastData[1].totalLiquidityUst = sum.liquidity.toString()
     lastData[1].volumeUst = sum.volume.toString()
     lastData[1].txns = sum.txns
   }

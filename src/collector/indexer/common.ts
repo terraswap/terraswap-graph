@@ -52,6 +52,13 @@ export async function getTokenPriceAsUST(
 
     const liquidityIndex = largestLiquidity[1]
 
+    if (pairData[liquidityIndex].token1Reserve == '0') {
+      return {
+        price: '0',
+        liquidity: '0',
+      }
+    }
+
     return {
       price: num(pairData[liquidityIndex].token0Reserve)
         .div(pairData[liquidityIndex].token1Reserve)
