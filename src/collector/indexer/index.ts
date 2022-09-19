@@ -6,9 +6,13 @@ import { CreatePairIndexer } from './createPairIndexer'
 import { TxHistoryIndexer } from './txHistoryIndexer'
 import { NativeTransferIndexer, NonnativeTransferIndexer } from './transferIndexer'
 
-const factoryAddress = process.env.TERRA_CHAIN_ID.indexOf('columbus') === -1
-  ?'terra18qpjm4zkvqnpjpw0zn0tdr8gdzvt8au35v45xf' //testnet
-  :'terra1ulgw0td86nvs4wtpsc80thv6xelk76ut7a7apj' //mainnet
+export const factoryAddressMap ={
+  columbus: "terra1jkndu9w5attpz09ut02sgey5dd3e8sq5watzm0",
+  pisco: "",
+  phoenix: "",
+};
+
+const factoryAddress: string = process.env.TERRASWAP_FACTORY || factoryAddressMap.columbus;
 
 const createPairLF = createCreatePairLogFinders(factoryAddress)
 const nativeTransferLF = createNativeTransferLogFinders()

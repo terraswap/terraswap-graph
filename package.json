@@ -15,7 +15,7 @@
     "lint": "eslint '*/**/*.{js,ts,tsx}' --fix",
     "test": "npm test",
     "migrate": "NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/migrate_col5_pairs/main.ts",
-    "dashboard": "npm run commithash && NODE_ENV=production node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/dashboard/main.ts"
+    "dashboard": "npm run commithash && NODE_ENV=production node --stack_size=1024 --max-old-space-size=2048 -r ts-node/register/transpile-only -r tsconfig-paths/register src/dashboard/main.ts"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

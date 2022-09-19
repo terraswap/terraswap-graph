@@ -1,7 +1,6 @@
 import 'reflect-metadata'
 import * as bluebird from 'bluebird'
 import { once } from 'lodash'
-import { initMantle } from 'lib/terra'
 import * as logger from 'lib/logger'
 import { init as initErrorHandler, errorHandler } from 'lib/error'
 import { initORM, finalizeORM } from 'orm'
@@ -37,8 +36,6 @@ async function main(): Promise<void> {
   validateConfig()
 
   await initORM()
-
-  initMantle(process.env.TERRA_MANTLE)
 
   await initServer()
 

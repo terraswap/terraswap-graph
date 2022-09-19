@@ -2,13 +2,13 @@ import { Get, Param, Query } from '@nestjs/common'
 import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { DashboardTxsService } from 'dashboard/services/txs.service'
-import { MyController } from '../decorators/controller.decorator'
+import { DashboardController } from '../decorators/controller.decorator'
 import { TxParam, TxResponse, TxsQuery, TxsResponse } from '../dtos/txs.dtos'
 
-@MyController('/txs')
+@DashboardController('txs')
 @ApiTags('dashboard')
 export class TxsController {
-  constructor(private readonly service: DashboardTxsService) {}
+  constructor(private readonly service: DashboardTxsService) { }
 
   @Get('')
   @ApiResponse({ type: TxsResponse })
@@ -25,7 +25,7 @@ export class TxsController {
     enum: TerraswapAction,
   })
   async getPairTxs(@Query() query: TxsQuery): Promise<TxsResponse> {
-    return this.service.getTxs(query.pair,  query.action)
+    return this.service.getTxs(query.pair, query.action)
   }
 
   @Get('/:txHash')

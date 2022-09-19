@@ -10,9 +10,9 @@ import {
   TerraswapQuery,
   TerraswapRecentDataResponse,
 } from 'dashboard/user-interfaces/dtos/terraswap.dtos'
-import { MyController } from '../decorators/controller.decorator'
+import { DashboardController } from '../decorators/controller.decorator'
 
-@MyController('terraswap')
+@DashboardController('terraswap')
 @ApiTags('dashboard')
 export class TerraswapController {
   constructor(private readonly service: DashboardTerraswapService) {}

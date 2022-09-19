@@ -41,6 +41,10 @@ export async function initGraphQL(app: Koa): Promise<void> {
   await server.start()
 
   server.applyMiddleware({ app, path: '/' })
+  const apiVersion = process.env.API_VERSION
+  if (apiVersion) {
+    server.applyMiddleware({ app, path: `/${apiVersion}`})
+  }
 }
 
 export async function finalizeGraphQL(): Promise<void> {

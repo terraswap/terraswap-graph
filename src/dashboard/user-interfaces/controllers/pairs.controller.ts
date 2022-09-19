@@ -1,7 +1,7 @@
 import { Get, Param } from '@nestjs/common'
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { DashboardPairsService } from 'dashboard/services/pairs.service'
-import { MyController } from '../decorators/controller.decorator'
+import { DashboardController } from '../decorators/controller.decorator'
 import {
   PairRecentDataResponse,
   PairResponse,
@@ -10,10 +10,10 @@ import {
   PairsResponses,
 } from '../dtos/pairs.dtos'
 
-@MyController('/pairs')
+@DashboardController('pairs')
 @ApiTags('dashboard')
 export class PairsController {
-  constructor(private readonly service: DashboardPairsService) {}
+  constructor(private readonly service: DashboardPairsService) { }
 
   @Get()
   @ApiResponse({ type: [PairsResponse] })
