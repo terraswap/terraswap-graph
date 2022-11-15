@@ -1,11 +1,10 @@
 import { hashToHex } from '@terra-money/terra.js'
 import { Tx } from 'types'
-import { getLatestBlockHeight } from './lcd'
+
 import { rpc } from './rpc'
 
 interface querier {
   getTxsByHeight(height: number): Promise<Tx[]>
-  getLatestBlock(): Promise<number>
 }
 
 const querier = {
@@ -40,17 +39,8 @@ const querier = {
     })
     return txs
   },
-
-  async getLatestBlock(): Promise<number> {
-    return await getLatestBlockHeight()
-  },
 }
-
 
 export async function getTxsByHeight(height: number): Promise<Tx[]> {
   return await querier.getTxsByHeight(height)
-}
-
-export async function getLatestBlock(): Promise<number> {
-  return await querier.getLatestBlock()
 }

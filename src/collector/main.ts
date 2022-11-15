@@ -17,7 +17,7 @@ async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
-  for (;;) {
+  for (; ;) {
     await collect(pairList, tokenList).catch(errorHandlerWithSentry)
     await bluebird.delay(500)
   }

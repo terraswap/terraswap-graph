@@ -7,8 +7,6 @@ export function validateConfig(): void {
       throw new Error(`process.env.${key} is missing`)
     }
   }
-
-
 }
 
 const config = {

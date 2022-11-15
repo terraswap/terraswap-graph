@@ -3,7 +3,7 @@ import { delay } from 'bluebird'
 import * as http from 'http'
 import * as https from 'https'
 import { stringToDate } from 'lib/utils'
-import { START_BLOCK_HEIGHT } from 'migrate_col5_pairs/overwrite'
+import { START_BLOCK_HEIGHT } from 'migrate_col5_pairs/main'
 import { Cycle } from 'types'
 
 import { PoolInfoDto } from '../dtos'

@@ -9,7 +9,7 @@ export function calculateFee(volume: string): string {
 }
 
 export function calculateIncreasedRate(current = '0', prev = '0'): string {
-  if (prev === '0' && current === '0') {
+  if (prev === '0' || current === '0') {
     return '0'
   }
   return new BigNumber(current).dividedBy(prev).minus(1).toString()

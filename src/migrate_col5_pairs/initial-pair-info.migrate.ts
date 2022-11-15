@@ -1,6 +1,6 @@
 import { delay } from 'bluebird'
 import { getLiquidityAsUST } from 'collector/indexer/transferUpdater'
-import { getOracleExchangeRate } from 'lib/terra'
+import { oracle } from 'lib/terra'
 import { isTokenOrderedWell, stringToDate } from 'lib/utils'
 import { PairDataEntity, PairDayDataEntity, PairHourDataEntity, PairInfoEntity } from 'orm'
 import { EntityManager, getManager, getRepository } from 'typeorm'
@@ -85,7 +85,7 @@ export async function migratePairsInfo() {
       ? poolInfo.query_result.assets[1]
       : poolInfo.query_result.assets[0]
 
-    const exchangeRate = await getOracleExchangeRate(poolInfo.height)
+    const exchangeRate = await oracle.getExchangeRate(poolInfo.height)
     const liquidity = await getLiquidityAsUST(
       getManager(),
       {

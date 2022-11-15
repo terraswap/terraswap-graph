@@ -1,7 +1,7 @@
 import { createReturningLogFinder, ReturningLogFinderMapper } from '@terra-money/log-finder'
 import { trimAssets, addMinus } from 'lib/utils'
 import { TxHistoryTransformed } from 'types'
-import * as logRules from './log-rules'
+import logRules from './log-rules'
 
 export function createSPWFinder(
   pairAddresses: Record<string, boolean>

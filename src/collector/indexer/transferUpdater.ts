@@ -11,6 +11,7 @@ import { compareLiquidity, stringToDate, isNative } from 'lib/utils'
 import { Cycle, Asset, ExchangeRate } from 'types'
 import { getTokenPriceAsUST } from './common'
 import { num } from 'lib/num'
+import { baseCurrency } from 'lib/terraswap'
 
 interface Reserve {
   token0: string
@@ -85,8 +86,8 @@ export async function getLiquidityAsUST(
   exchangeRate: ExchangeRate | undefined
 ): Promise<string> {
   //case1. uusd exist
-  if (tokenReserve.token0 === 'uusd' || tokenReserve.token1 === 'uusd') {
-    return tokenReserve.token0 === 'uusd'
+  if (tokenReserve.token0 === baseCurrency || tokenReserve.token1 === baseCurrency) {
+    return tokenReserve.token0 === baseCurrency
       ? (Number(tokenReserve.token0Reserve) * 2).toString()
       : (Number(tokenReserve.token1Reserve) * 2).toString()
   }
@@ -151,6 +152,7 @@ export async function updateExchangeRate(
   timestamp: string,
   pair: string
 ): Promise<ExchangeRateEntity> {
+  parseInt(liquidity)
   const exchangeRateRepo = manager.getRepository(ExchangeRateEntity)
 
   const lastRate = await exchangeRateRepo.findOne({

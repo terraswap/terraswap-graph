@@ -6,6 +6,8 @@ services:
     volumes:
       - ./database/data:/var/lib/postgres
     ports:
-      - ${TERRASWAP_GRAPH_PORT:-5432}:5432
+      - ${DB_PORT:-5432}:5432
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${DB_USER:-terraswap_graph_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-terraswap_graph_password}
+      POSTGRES_DB: ${DB_DATABASE:-terraswap_graph}

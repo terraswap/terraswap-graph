@@ -1,6 +1,6 @@
 import { EntityManager, getManager } from 'typeorm'
 import { delay } from 'bluebird'
-import { getTxsByHeight, getLatestBlock, getOracleExchangeRate } from 'lib/terra'
+import { getTxsByHeight, lcd, oracle } from 'lib/terra'
 import { errorHandler } from 'lib/error'
 import * as logger from 'lib/logger'
 import { getCollectedBlock, updateBlock } from './block'
@@ -18,7 +18,7 @@ export async function collect(
   tokenList: Record<string, boolean>
 ): Promise<void> {
   //latest Height or end Height
-  let latestBlock = await getLatestBlock().catch(errorHandler)
+  let latestBlock = await lcd.getLatestBlockHeight().catch(errorHandler)
 
   if (!latestBlock) return
 
@@ -30,13 +30,8 @@ export async function collect(
 
   const lastHeight = collectedBlock.height
 
-
-  if (chainId === 'columbus-4' || lastHeight < columbus4EndHeight){
-    throw new Error (`this version is for the columbus-5, you have to collect columbus-4 data by using columbus-4 version of terraswap-graph first`)
-  }
-
   // initial exchange rate
-  let exchangeRate = await getOracleExchangeRate(lastHeight - (lastHeight % 100))
+  let exchangeRate = await oracle.getExchangeRate(lastHeight - (lastHeight % 100))
 
   if (latestBlock === lastHeight) {
     if (lastHeight === columbus4EndHeight) 
@@ -51,7 +46,7 @@ export async function collect(
     if (!txs) return
 
     if (height % 100 === 0){
-      exchangeRate = await getOracleExchangeRate(height)
+      exchangeRate = await oracle.getExchangeRate(height)
     }
 
     await getManager().transaction(async (manager: EntityManager) => {

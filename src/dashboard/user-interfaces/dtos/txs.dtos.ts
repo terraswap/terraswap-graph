@@ -1,13 +1,11 @@
-import { Type } from 'class-transformer'
-import { IsEnum, IsInt, IsOptional, IsString, Length, Max, Min } from 'class-validator'
+import { IsEnum, IsOptional, IsString, Length } from 'class-validator'
 import { TerraswapAction } from 'dashboard/services/dtos/dtos'
 import { ApiResponseProperty } from '../decorators/api-property.decorator'
 
 export class TxParam {
   @IsString()
-  @Length(64,64)
-  txHash:string
-
+  @Length(64, 64)
+  txHash: string
 }
 
 export class TxsQuery {
@@ -22,7 +20,7 @@ export class TxsQuery {
 }
 
 export class TxResponse {
-  @ApiResponseProperty({example: '1923342'})
+  @ApiResponseProperty({ example: '1923342' })
   id: number
 
   @ApiResponseProperty({ description: 'timestamp for the tx', example: '2021-11-10 09:41:02.774' })
@@ -45,7 +43,7 @@ export class TxResponse {
 }
 
 export class TxsResponse {
-  @ApiResponseProperty({ example: 256 , deprecated: true})
+  @ApiResponseProperty({ example: 256, deprecated: true })
   totalCount: number
 
   @ApiResponseProperty({ type: [TxResponse] })

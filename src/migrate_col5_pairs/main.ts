@@ -19,7 +19,6 @@ const config = isMainnet ? col5 : bombay12
 
 export const TERRA_CHAIN_ID = config.chainId
 export const START_BLOCK_HEIGHT = config.startHeight
-export const LUNA_USD_PAIR = config.lunaUsdPair
 
 async function run() {
   await initORM()

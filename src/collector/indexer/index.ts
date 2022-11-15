@@ -5,14 +5,8 @@ import { createCreatePairLogFinders, createSPWFinder, createNativeTransferLogFin
 import { CreatePairIndexer } from './createPairIndexer'
 import { TxHistoryIndexer } from './txHistoryIndexer'
 import { NativeTransferIndexer, NonnativeTransferIndexer } from './transferIndexer'
+import { factoryAddress } from 'lib/terraswap/'
 
-export const factoryAddressMap ={
-  columbus: "terra1jkndu9w5attpz09ut02sgey5dd3e8sq5watzm0",
-  pisco: "",
-  phoenix: "",
-};
-
-const factoryAddress: string = process.env.TERRASWAP_FACTORY || factoryAddressMap.columbus;
 
 const createPairLF = createCreatePairLogFinders(factoryAddress)
 const nativeTransferLF = createNativeTransferLogFinders()
@@ -25,17 +19,17 @@ export async function runIndexers(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
-  for(const tx of txs) {
+  for (const tx of txs) {
     const Logs = tx.logs
     const timestamp = tx.timestamp
     const txHash = tx.txhash
 
-    for(const log of Logs) {
+    for (const log of Logs) {
       const events = log.events
 
-      for(const event of events){
+      for (const event of events) {
         // for spam tx
-        if (event.attributes.length < 1800){
+        if (event.attributes.length < 1800) {
           // createPair
           const createPairLogFounds = createPairLF(event)
           createPairLogFounds.length > 0 && await CreatePairIndexer(pairList, tokenList, manager, timestamp, createPairLogFounds)
