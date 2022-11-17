@@ -18,13 +18,9 @@ export async function collect(
   tokenList: Record<string, boolean>
 ): Promise<void> {
   //latest Height or end Height
-  let latestBlock = await lcd.getLatestBlockHeight().catch(errorHandler)
+  const latestBlock = await chainId === 'columbus-4' ? columbus4EndHeight : lcd.getLatestBlockHeight().catch(errorHandler)
 
   if (!latestBlock) return
-
-  if (chainId === 'columbus-4' && latestBlock > columbus4EndHeight){
-    latestBlock = columbus4EndHeight
-  }
 
   const collectedBlock = await getCollectedBlock()
 
@@ -34,7 +30,7 @@ export async function collect(
   let exchangeRate = await oracle.getExchangeRate(lastHeight - (lastHeight % 100))
 
   if (latestBlock === lastHeight) {
-    if (lastHeight === columbus4EndHeight) 
+    if (lastHeight === columbus4EndHeight)
       throw new Error(`columbus-4 ended at height ${columbus4EndHeight}. Please change terraswap graph to the columbus-5 version`)
 
     await delay(500)
@@ -45,13 +41,13 @@ export async function collect(
     const txs = await getTxsByHeight(height).catch(errorHandler)
     if (!txs) return
 
-    if (height % 100 === 0){
+    if (height % 100 === 0) {
       exchangeRate = await oracle.getExchangeRate(height)
     }
 
     await getManager().transaction(async (manager: EntityManager) => {
       if (!(latestBlock === lastHeight && txs[0] === undefined)) {
-        if(txs[0] !== undefined){
+        if (txs[0] !== undefined) {
           await runIndexers(manager, txs, exchangeRate, pairList, tokenList)
           height % 100 === 0 && await updateTerraswapData(manager)
         }

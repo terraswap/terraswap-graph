@@ -22,7 +22,7 @@ const querier = {
     const blockResultsData = JSON.parse(blockResults.data)
     const txs: Tx[] = []
 
-    blockData.result.block.data.txs.forEach((tx: any, idx: number) => {
+    blockData.result.block.data?.txs?.forEach((tx: any, idx: number) => {
       const txString = typeof tx === 'string' ? tx : Buffer.from(tx).toString()
       const txHashStr = hashToHex(txString)
       const txResult = blockResultsData.result?.txs_results[idx]
