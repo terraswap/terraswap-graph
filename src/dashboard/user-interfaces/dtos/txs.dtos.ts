@@ -11,7 +11,7 @@ export class TxParam {
 export class TxsQuery {
   @IsOptional()
   @IsString()
-  @Length(44, 44)
+  @Length(44, 64)
   pair: string
 
   @IsOptional()

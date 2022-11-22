@@ -17,7 +17,7 @@ export class PairsParam {
   @Validate((pairAddress: string)=>{
     return pairAddress.startsWith('terra1')
   })
-  @Length(44,44)
+  @Length(44,64)
   pairAddress: string
 }
 
