@@ -11,7 +11,6 @@ import { compareLiquidity, stringToDate, isNative } from 'lib/utils'
 import { Cycle, Asset, ExchangeRate } from 'types'
 import { getTokenPriceAsUST } from './common'
 import { num } from 'lib/num'
-import { baseCurrency } from 'lib/terraswap'
 
 interface Reserve {
   token0: string
@@ -85,30 +84,7 @@ export async function getLiquidityAsUST(
   timestamp: string,
   exchangeRate: ExchangeRate | undefined
 ): Promise<string> {
-  //case1. uusd exist
-  if (tokenReserve.token0 === baseCurrency || tokenReserve.token1 === baseCurrency) {
-    return tokenReserve.token0 === baseCurrency
-      ? (Number(tokenReserve.token0Reserve) * 2).toString()
-      : (Number(tokenReserve.token1Reserve) * 2).toString()
-  }
-
-  //case2. both are native: use asset0
-  else if (isNative(tokenReserve.token0) && isNative(tokenReserve.token1)) {
-    const token0Price = await getTokenPriceAsUST(
-      manager,
-      tokenReserve.token0,
-      new Date(timestamp),
-      exchangeRate
-    )
-
-    return num(token0Price.price)
-      .multipliedBy(tokenReserve.token0Reserve)
-      .multipliedBy(2)
-      .toString()
-  }
-
-  //case3. only one is native
-  else if (isNative(tokenReserve.token0) || isNative(tokenReserve.token1)) {
+  if (isNative(tokenReserve.token0) || isNative(tokenReserve.token1)) {
     const nativeTokenIndex = isNative(tokenReserve.token0) ? 0 : 1
 
     const tokenPrice = await getTokenPriceAsUST(
@@ -161,12 +137,12 @@ export async function updateExchangeRate(
   })
 
   if (lastRate?.timestamp?.valueOf() === stringToDate(timestamp, Cycle.MINUTE).valueOf()) {
-    lastRate.token0Price = changeInfinitePirceToZero(
+    lastRate.token0Price = changeInfinitePriceToZero(
       updatedReserve.token1Reserve,
       updatedReserve.token0Reserve
     )
 
-    lastRate.token1Price = changeInfinitePirceToZero(
+    lastRate.token1Price = changeInfinitePriceToZero(
       updatedReserve.token0Reserve,
       updatedReserve.token1Reserve
     )
@@ -181,13 +157,13 @@ export async function updateExchangeRate(
       timestamp: stringToDate(timestamp, Cycle.MINUTE),
       pair: pair,
       token0: updatedReserve.token0,
-      token0Price: changeInfinitePirceToZero(
+      token0Price: changeInfinitePriceToZero(
         updatedReserve.token1Reserve,
         updatedReserve.token0Reserve
       ),
       token0Reserve: updatedReserve.token0Reserve,
       token1: updatedReserve.token1,
-      token1Price: changeInfinitePirceToZero(
+      token1Price: changeInfinitePriceToZero(
         updatedReserve.token0Reserve,
         updatedReserve.token1Reserve
       ),
@@ -206,7 +182,7 @@ export async function updateReserves(
   pair: string
 ): Promise<void> {
   await updateReserve(Cycle.HOUR, manager, updatedReserve, liquidity, timestamp, pair)
-  await updateReserve(Cycle.DAY, manager, updatedReserve, liquidity, timestamp,  pair)
+  await updateReserve(Cycle.DAY, manager, updatedReserve, liquidity, timestamp, pair)
 }
 
 export async function updateTerraswapData(
@@ -239,7 +215,7 @@ export async function updateTerraswapData(
 
   for (const data of todayData) {
     sum.liquidity += Number(data.liquidity_ust)
-    if (data.timestamp.valueOf() === lastData[0].timestamp.valueOf()){
+    if (data.timestamp.valueOf() === lastData[0].timestamp.valueOf()) {
       sum.volume += Number(data.volume_ust)
       sum.txns += data.txns
     }
@@ -269,7 +245,7 @@ export async function updateTerraswapData(
 
     for (const data of lastDayData) {
       sum.liquidity += Number(data.liquidity_ust)
-      if (data.timestamp.valueOf() === lastData[1].timestamp.valueOf()){
+      if (data.timestamp.valueOf() === lastData[1].timestamp.valueOf()) {
         sum.volume += Number(data.volume_ust)
         sum.txns += data.txns
       }
@@ -305,22 +281,22 @@ async function updateReserve(
 
   const isSame = txTime.valueOf() === lastPairData?.timestamp?.valueOf()
 
-  if(isSame) {
+  if (isSame) {
     lastPairData.token0Reserve = updatedReserve.token0Reserve
     lastPairData.token1Reserve = updatedReserve.token1Reserve
     lastPairData.liquidityUst = liquidity
     return pairRepo.save(lastPairData)
-  } else{
-    //frist data
+  } else {
+    //first data
     if (lastPairData === undefined) {
       const pairInfoRepo = manager.getRepository(PairInfoEntity)
-  
+
       const pairInfo = await pairInfoRepo.findOne({
         where: [{ pair }],
       })
-  
+
       if (!pairInfo) return
-  
+
       const pairData = new PairDayDataEntity({
         timestamp: txTime,
         pair,
@@ -335,7 +311,7 @@ async function updateReserve(
         liquidityUst: liquidity,
         txns: 0,
       })
-  
+
       return pairRepo.save(pairData)
     } else {
       const pairData = new PairDataEntity({
@@ -358,7 +334,7 @@ async function updateReserve(
   }
 }
 
-function changeInfinitePirceToZero(number0: string, number1: string): string {
+function changeInfinitePriceToZero(number0: string, number1: string): string {
   if (number1 === '0') return '0'
   return num(number0).div(number1).toString()
 }

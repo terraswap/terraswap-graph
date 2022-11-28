@@ -18,7 +18,7 @@ export async function collect(
   tokenList: Record<string, boolean>
 ): Promise<void> {
   //latest Height or end Height
-  const latestBlock = await chainId === 'columbus-4' ? columbus4EndHeight : lcd.getLatestBlockHeight().catch(errorHandler)
+  const latestBlock = await (chainId === 'columbus-4' ? columbus4EndHeight : lcd.getLatestBlockHeight().catch(errorHandler))
 
   if (!latestBlock) return
 

@@ -18,10 +18,7 @@ export class Terra2Oracle implements Oracle {
         })
     }
     async getExchangeRate(height: number): Promise<ExchangeRate> {
-        return {
-            height: `${height}`,
-            result: []
-        }
+        return undefined
     }
 
     async exchangeRateToUSX(denom: string, inputExchangeRate: ExchangeRate): Promise<string> {
