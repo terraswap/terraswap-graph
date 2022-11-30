@@ -1,9 +1,8 @@
-import { delay } from 'bluebird'
 import { getLiquidityAsUST } from 'collector/indexer/transferUpdater'
 import { oracle } from 'lib/terra'
 import { isTokenOrderedWell, stringToDate } from 'lib/utils'
 import { PairDataEntity, PairDayDataEntity, PairHourDataEntity, PairInfoEntity } from 'orm'
-import { EntityManager, getManager, getRepository } from 'typeorm'
+import { getManager, getRepository } from 'typeorm'
 import { Cycle } from 'types'
 import { getAssetId, PoolInfoDto } from './dtos'
 import { START_BLOCK_HEIGHT } from './main'
@@ -34,8 +33,6 @@ async function findFirstAppearance(pair: string, latestHeight: number) {
   while (l < r) {
     const m = Math.floor((l + r) / 2)
     res = await getPoolInfo(pair, m)
-    await delay(50)
-
     if (res) {
       r = m
     } else {
@@ -60,7 +57,7 @@ async function findFirstAppearance(pair: string, latestHeight: number) {
   return res
 }
 
-export async function migratePairsInfo() {
+export async function migratePairsInfo(): Promise<void> {
   const pairs = await getCandidateAddresses()
   const latestHeight = await getLatestBlockHeight()
 
@@ -112,31 +109,14 @@ export async function migratePairsInfo() {
       timestamp: new Date(poolInfo.datetimeString),
     })
 
-    const cycles = [Cycle.HOUR, Cycle.DAY]
     await getManager().transaction(async (manager) => {
-      const promises = cycles.map((c) => {
-        return savePairData(manager, [entity], c)
-      })
-      await Promise.all(promises)
+      const hourRepo = manager.getRepository(PairHourDataEntity)
+      const dayRepo = manager.getRepository(PairDayDataEntity)
+      const hourEntity = hourRepo.create({ ...entity, timestamp: stringToDate(entity.timestamp.toString(), Cycle.HOUR) })
+      const dayEntity = dayRepo.create({ ...entity, timestamp: stringToDate(entity.timestamp.toString(), Cycle.DAY) })
+
+      await hourRepo.save(hourEntity)
+      await dayRepo.save(dayEntity)
     })
   }
-}
-
-async function savePairData(manager: EntityManager, entities: PairDataEntity[], cycle: Cycle) {
-  if (cycle !== Cycle.HOUR && cycle !== Cycle.DAY) {
-    throw new Error(`wrong format cycle`)
-  }
-
-  const parsedTimeEntities = entities.map((e) => {
-    e.timestamp = stringToDate(e.timestamp.toString(), cycle)
-    return e
-  })
-
-  let repo = manager.getRepository(PairHourDataEntity)
-
-  if (cycle === Cycle.DAY) {
-    repo = getRepository(PairDayDataEntity)
-  }
-
-  await repo.save(parsedTimeEntities)
 }

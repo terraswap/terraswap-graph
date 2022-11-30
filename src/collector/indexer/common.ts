@@ -79,7 +79,7 @@ async function _classicTokenPrice(manager: EntityManager,
     if (target === token) {
       break;
     }
-    paths.get(target).forEach(p => {
+    paths.get(target)?.forEach(p => {
       const other = p.assets[0].token === target ? p.assets[1].token : p.assets[0].token;
       const otherPrice = _calculatePrice(p.assets, target, price[target].price);
       if (!price[other] || num(price[other].liquidity).lt(num(p.liquidity))) {

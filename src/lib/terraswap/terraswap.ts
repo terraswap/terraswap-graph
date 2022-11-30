@@ -14,7 +14,7 @@ const chainPrefix: string = process.env.TERRA_CHAIN_ID?.split("-")[0]
 export const factoryAddress: string = process.env.TERRASWAP_FACTORY || factoryAddressMap[chainPrefix];
 export const baseCurrency: string = baseCurrencyMap[chainPrefix];
 
-export interface Asset {
+export interface AssetRes {
   token?: {
     contract_addr: string
   }
@@ -23,9 +23,33 @@ export interface Asset {
   }
 }
 
-export interface Pair {
-  asset_infos: Asset[]
+export interface PairRes {
+  asset_infos: AssetRes[]
   asset_decimals: [number, number]
   contract_addr: string
   liquidity_token: string
 }
+
+export interface AssetInfoRes {
+  info: AssetRes
+  amount: string
+}
+
+export interface PoolInfoRes  {
+  assets: AssetInfoRes[]
+  total_share: string
+}
+
+export interface Asset{
+  addr: string
+  decimals: number
+  amount: string
+}
+
+export interface Pair {
+  assets: Asset[]
+  addr: string
+  lp: string
+  lpAmount: string
+}
+

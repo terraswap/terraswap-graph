@@ -47,9 +47,9 @@ export class PairDataEntity {
   txns: number
 }
 
-@Index('timestamp_pair_idx', ['timestamp', 'pair'], { unique: true })
+@Index('timestamp_pair_idx_day', ['timestamp', 'pair'], { unique: true })
 @Entity('pair_day_data')
 export class PairDayDataEntity extends PairDataEntity {}
-@Index('timestamp_pair_idx', ['timestamp', 'pair'], { unique: true })
+@Index('timestamp_pair_idx_hour', ['timestamp', 'pair'], { unique: true })
 @Entity('pair_hour_data')
 export class PairHourDataEntity extends PairDataEntity {}

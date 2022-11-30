@@ -1,10 +1,9 @@
 import * as http from 'http';
 import * as https from 'https';
 
-import axios, { Axios, AxiosRequestHeaders } from "axios";
+import axios, { Axios } from "axios";
 import { ExchangeRate } from "types";
-import { Oracle, Pair, PairRes, PoolInfoRes } from "./interfaces";
-import { factoryAddress } from '../../terraswap';
+import { Oracle } from "./interfaces";
 
 export class Terra2Oracle implements Oracle {
     private readonly USX_ADDR = process.env.STABLE_COIN_ADDR;
@@ -23,51 +22,5 @@ export class Terra2Oracle implements Oracle {
 
     async exchangeRateToUSX(denom: string, inputExchangeRate: ExchangeRate): Promise<string> {
         return
-    }
-
-    async getPoolBalance(pair: string, height?: number): Promise<PoolInfoRes> {
-        const data = { pool: {} }
-        return await this.queryContract(pair, data, height)
-    }
-
-    async getAllPairs(height?: number): Promise<Pair[]> {
-        const pairs: PairRes[] = [];
-        let current: PairRes[] = [];
-        do {
-            pairs.push(...current)
-            const queryStr = `{"pairs": { "limit": 30 ${pairs.length ? `,"start_after":${JSON.stringify(pairs.at(-1).asset_infos)}` : ""} }}`
-            const data = Buffer.from(queryStr).toString('base64')
-            current = (await this.queryContract(factoryAddress, data, height))?.pairs
-        } while (current?.length !== 0)
-        return pairs.map(p => ({
-            addr: p.contract_addr,
-            lp: p.liquidity_token,
-            lpAmount: "0",
-            assets: p.asset_infos.map(
-                (a, idx) => ({
-                    addr: a.token?.contract_addr ?? a.native_token?.denom,
-                    decimals: p.asset_decimals[idx],
-                    amount: "0",
-                })
-            )
-        }))
-    }
-
-    private async queryContract(contract: string, data: any, height?: number) {
-        if (typeof data !== 'string') {
-            data = Buffer.from(JSON.stringify(data)).toString('base64')
-        }
-        const headers: AxiosRequestHeaders = {
-            'Content-Type': 'application/json',
-            'x-cosmos-block-height': `${height}`
-        }
-        try {
-
-            const res = await this.axios.get(`/cosmwasm/wasm/v1/contract/${contract}/smart/${data}`, { headers })
-            return res.data.data
-        }catch(err) {
-            console.log(err)
-        }
-        return undefined
     }
 }

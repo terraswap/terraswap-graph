@@ -1,7 +1,9 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { delay } from 'bluebird'
 import * as http from 'http'
 import * as https from 'https'
+import { factoryAddress, Pair } from 'lib/terraswap'
+import { ColumbusTerraswap } from 'lib/terraswap/classic'
 import { stringToDate } from 'lib/utils'
 import { START_BLOCK_HEIGHT } from 'migrate_col5_pairs/main'
 import { Cycle } from 'types'
@@ -9,7 +11,8 @@ import { Cycle } from 'types'
 import { PoolInfoDto } from '../dtos'
 
 const lcdUrl = process.env.TERRA_LCD || 'https://lcd.terra.dev'
-const wasmBasePath = `/terra/wasm/v1beta1/contracts/pairAddress/store?query_msg=eyJwb29sIjp7fX0=`
+const terraswapQuerier = new ColumbusTerraswap(lcdUrl)
+const poolInfoBasePath = `/terra/wasm/v1beta1/contracts/address/store?query_msg=eyJwb29sIjp7fX0=`
 const blockBasePath = `/blocks/height`
 const lcdClient = axios.create({
   baseURL: lcdUrl,
@@ -21,7 +24,7 @@ const lcdClient = axios.create({
 export async function getLatestBlockHeight(): Promise<number> {
   try {
     const res = await await lcdClient.get(`/blocks/latest`)
-   return parseInt(res.data.block.header.height)
+    return parseInt(res.data.block.header.height)
   } catch (err) {
     console.log(err)
     throw new Error(`cannot get latest block height`)
@@ -29,7 +32,7 @@ export async function getLatestBlockHeight(): Promise<number> {
 }
 
 export async function getPoolInfo(pairAddress: string, height?: number): Promise<PoolInfoDto> {
-  const path = wasmBasePath.replace('pairAddress', pairAddress)
+  const path = poolInfoBasePath.replace('address', pairAddress)
   let headers
   if (height) {
     headers = {
@@ -85,3 +88,51 @@ export async function getBlockHeightByTime(targetTimestamp: number, cycle: Cycle
   }
   return l
 }
+
+export async function migrationHeight(): Promise<number> {
+  let r = await getLatestBlockHeight()
+  let l = START_BLOCK_HEIGHT
+  const queryStr = `{"pairs": {}}`
+  const data = Buffer.from(queryStr).toString('base64')
+  while (l < r) {
+    const m = Math.floor((l + r) / 2)
+    const res = await terraswapQuerier.queryContract(factoryAddress, data, m)
+    if (res?.pairs?.length && l == m) {
+      break
+    }
+    if (res?.pairs?.length) {
+      r = m - 1
+    } else {
+      l = m + 1
+    }
+  }
+  return l
+}
+
+export async function getAllPairs(height?: number): Promise<Pair[]> {
+  return await terraswapQuerier.getAllPairs(height)
+}
+
+export async function getVerifiedTokens(): Promise<TokensRes> {
+  const res: AxiosResponse<VerifiedTokensRes> = await lcdClient.get('https://assets.terra.money/cw20/tokens.json')
+  return res.data.classic
+}
+
+interface TokensRes {
+  [key: string]: {
+    protocol?: string
+    symbol?: string
+    name?: string
+    token?: string
+    icon?: string
+    decimals?: number
+  }
+}
+
+interface VerifiedTokensRes {
+  mainnet: TokensRes
+  classic: TokensRes
+  testnet: TokensRes
+}
+
+
