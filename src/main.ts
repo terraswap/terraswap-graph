@@ -1,12 +1,10 @@
 import 'reflect-metadata'
 import * as bluebird from 'bluebird'
 import { once } from 'lodash'
-import { initMantle } from 'lib/terra'
 import * as logger from 'lib/logger'
 import { init as initErrorHandler, errorHandler } from 'lib/error'
 import { initORM, finalizeORM } from 'orm'
 import { initServer, finalizeServer } from 'loaders'
-import { validateConfig } from 'config'
 
 bluebird.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -34,11 +32,7 @@ async function main(): Promise<void> {
 
   initErrorHandler({ sentryDsn: process.env.SENTRY })
 
-  validateConfig()
-
   await initORM()
-
-  initMantle(process.env.TERRA_MANTLE)
 
   await initServer()
 

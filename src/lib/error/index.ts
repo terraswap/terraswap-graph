@@ -24,13 +24,19 @@ export function init(
   })
 }
 
-export function errorHandler(error?: Error): void {
+export function errorHandlerWithSentry(error?: Error): void {
   if (error) {
     logger.error(error)
     // do not send Params Error to sentry
     if (!(error instanceof ParamsError)) {
       sentry.captureException(error)
     }
+  }
+}
+
+export function errorHandler(error?: Error): void {
+  if (error) {
+    logger.error(error)
   }
 }
 

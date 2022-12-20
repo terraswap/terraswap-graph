@@ -1,6 +1,6 @@
 import { createReturningLogFinder, ReturningLogFinderMapper } from '@terra-money/log-finder'
 import { NonnativeTransferTransformed } from 'types'
-import * as logRules from './log-rules'
+import logRules from './log-rules'
 
 export function createNonnativeTransferLogFinder(): ReturningLogFinderMapper<NonnativeTransferTransformed> {
   return createReturningLogFinder(logRules.nonnativeTransferRule(), (_, match) => {

@@ -30,7 +30,7 @@ export async function initGraphQL(app: Koa): Promise<void> {
   server = new ApolloServer({
     schema,
     context: ({ req }) => req,
-    debug: process.env.NODE_ENV !== 'production',
+    debug: process.env.NODE_ENV !== 'prod',
     introspection: true,
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground(),
@@ -40,7 +40,11 @@ export async function initGraphQL(app: Koa): Promise<void> {
 
   await server.start()
 
-  server.applyMiddleware({ app, path: '/graphql' })
+  server.applyMiddleware({ app, path: '/' })
+  const apiVersion = process.env.API_VERSION
+  if (apiVersion) {
+    server.applyMiddleware({ app, path: `/${apiVersion}`})
+  }
 }
 
 export async function finalizeGraphQL(): Promise<void> {

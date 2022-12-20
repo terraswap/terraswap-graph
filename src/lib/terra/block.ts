@@ -1,51 +1,46 @@
-import { gql } from 'graphql-request'
+import { hashToHex } from '@terra-money/terra.js'
 import { Tx } from 'types'
-import { mantle } from './mantle'
 
-export async function getBlock(height: number): Promise<Tx[]> {
-  const response = await mantle.request(
-    gql`
-      query ($height: Float!) {
-        tx {
-          byHeight(height: $height) {
-            timestamp
-            height
-            txhash
-            logs {
-              msg_index
-              events{
-                type
-                attributes {
-                  key
-                  value
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-    { height }
-  )
+import { rpc } from './rpc'
 
-  return response?.tx?.byHeight
+interface querier {
+  getTxsByHeight(height: number): Promise<Tx[]>
 }
 
-export async function getLatestBlock(): Promise<number> {
-  const response = await mantle.request(
-    gql`
-      {
-        tendermint {
-          blockInfo {
-            block {
-              header {
-                height
-              }
-            }
-          }
-        }
+const querier = {
+  async getTxsByHeight(height: number): Promise<Tx[]> {
+    const block = await rpc.get(`/block`, {
+      params: { height },
+    })
+
+    const blockResults = await rpc.get(`/block_results`, {
+      params: { height },
+    })
+    const blockData = JSON.parse(block.data)
+    const txTimestamp = blockData.result.block.header.time
+
+    const blockResultsData = JSON.parse(blockResults.data)
+    const txs: Tx[] = []
+
+    blockData.result.block.data?.txs?.forEach((tx: any, idx: number) => {
+      const txString = typeof tx === 'string' ? tx : Buffer.from(tx).toString()
+      const txHashStr = hashToHex(txString)
+      const txResult = blockResultsData.result?.txs_results[idx]
+      let logs = []
+      if (txResult.code === 0 ) {
+        logs = JSON.parse(txResult.log)
       }
-    `
-  )
-  return Number(response?.tendermint?.blockInfo?.block?.header?.height)
+      txs.push({
+        height, 
+        timestamp: txTimestamp,
+        txhash:txHashStr,
+        logs
+      })
+    })
+    return txs
+  },
+}
+
+export async function getTxsByHeight(height: number): Promise<Tx[]> {
+  return await querier.getTxsByHeight(height)
 }

@@ -55,12 +55,7 @@ export async function updateVolume24h(
       token1Volume: isRightOrder
         ? Math.abs(Number(transformed.assets[1].amount)).toString()
         : Math.abs(Number(transformed.assets[0].amount)).toString(),
-      volumeUst: await changeVolumeAsUST(
-        manager,
-        new Date(timestamp),
-        transformed,
-        exchangeRate
-      ),
+      volumeUst: await changeVolumeAsUST(manager, new Date(timestamp), transformed, exchangeRate),
     })
   )
 }
@@ -267,27 +262,7 @@ async function changeVolumeAsUST(
   transformed: TxHistoryTransformed,
   exchangeRate: ExchangeRate | undefined
 ): Promise<string> {
-  //case1. uusd exist
-  if (transformed.assets[0].token === 'uusd' || transformed.assets[1].token === 'uusd') {
-    return transformed.assets[0].token === 'uusd'
-      ? Math.abs(Number(transformed.assets[0].amount)).toString()
-      : Math.abs(Number(transformed.assets[1].amount)).toString()
-  }
-
-  //case2. both are native: use asset0
-  else if (isNative(transformed.assets[0].token) && isNative(transformed.assets[1].token)) {
-    const token0Price = await getTokenPriceAsUST(
-      manager,
-      transformed.assets[0].token,
-      timestamp,
-      exchangeRate
-    )
-
-    return num(token0Price.price).multipliedBy(transformed.assets[0].amount).abs().toString()
-  }
-
-  //case3. only one is native
-  else if (isNative(transformed.assets[0].token) || isNative(transformed.assets[1].token)) {
+  if (isNative(transformed.assets[0].token) || isNative(transformed.assets[1].token)) {
     const nativeTokenIndex = isNative(transformed.assets[0].token) ? 0 : 1
 
     const tokenPrice = await getTokenPriceAsUST(

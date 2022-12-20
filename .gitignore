@@ -8,10 +8,13 @@ node_modules/
 .eslintcache
 
 # environment variables file
-.env
+!.env.example
+.env*
 *.envrc
 
 # typeorm
-*ormconfig*
+ormlogs.log
 
 *.DS_Store
+
+.vscode

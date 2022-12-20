@@ -8,8 +8,8 @@ export class PairDataEntity {
   @PrimaryGeneratedColumn()
   id: string
 
-  @Column()
   @Index()
+  @Column()
   timestamp: Date
 
   @Column()
@@ -47,8 +47,9 @@ export class PairDataEntity {
   txns: number
 }
 
+@Index('timestamp_pair_idx_day', ['timestamp', 'pair'], { unique: true })
 @Entity('pair_day_data')
 export class PairDayDataEntity extends PairDataEntity {}
-
+@Index('timestamp_pair_idx_hour', ['timestamp', 'pair'], { unique: true })
 @Entity('pair_hour_data')
 export class PairHourDataEntity extends PairDataEntity {}

@@ -1,7 +1,7 @@
 import { EntityManager } from 'typeorm'
 import { PairInfoEntity, TokenInfoEntity } from 'orm'
 import { isTokenOrderedWell } from 'lib/utils'
-import { getTokenInfo } from 'lib/terra'
+import { lcd } from 'lib/terra'
 
 interface PairInfoTransformed {
   assets: string[]
@@ -20,7 +20,7 @@ export async function addTokenInfo(
 
   if (token === undefined) {
     // new one
-    const tokenInfoFromBlockData = await getTokenInfo(tokenAddress)
+    const tokenInfoFromBlockData = await lcd.getTokenInfo(tokenAddress)
 
     if (!tokenInfoFromBlockData) return undefined
 
@@ -35,6 +35,11 @@ export async function addTokenInfo(
 
     return tokenRepo.save(tokenInfo)
   } else {
+    if (token.pairs.find((v) => {
+      return v === newPair
+    })) {
+      return
+    }
     token.pairs = token.pairs.concat([newPair])
     return tokenRepo.save(token)
   }

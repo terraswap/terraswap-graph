@@ -1,6 +1,6 @@
 import { EntityManager, getManager } from 'typeorm'
 import { delay } from 'bluebird'
-import { getBlock, getLatestBlock, getOracleExchangeRate } from 'lib/terra'
+import { getTxsByHeight, lcd, oracle } from 'lib/terra'
 import { errorHandler } from 'lib/error'
 import * as logger from 'lib/logger'
 import { getCollectedBlock, updateBlock } from './block'
@@ -11,54 +11,44 @@ import { updateTerraswapData } from './indexer/transferUpdater'
 
 const columbus4EndHeight = 4_724_000
 
-// chain id needed
-const chainId = process.env.TERRA_CHAIN_ID 
+const chainId = process.env.TERRA_CHAIN_ID
 
 export async function collect(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
   //latest Height or end Height
-  let latestBlock = await getLatestBlock().catch(errorHandler)
+  const latestBlock = await (chainId === 'columbus-4' ? columbus4EndHeight : lcd.getLatestBlockHeight().catch(errorHandler))
 
   if (!latestBlock) return
-
-  if (chainId === 'columbus-4' && latestBlock > columbus4EndHeight){
-    latestBlock = columbus4EndHeight
-  }
 
   const collectedBlock = await getCollectedBlock()
 
   const lastHeight = collectedBlock.height
 
-
-  if (chainId === 'columbus-4' || lastHeight < columbus4EndHeight){
-    throw new Error (`this version is for the columbus-5, you have to collect columbus-4 data by using columbus-4 version of terraswap-graph first`)
-  }
-
   // initial exchange rate
-  let exchangeRate = await getOracleExchangeRate(lastHeight - (lastHeight % 100))
+  let exchangeRate = await oracle.getExchangeRate(lastHeight - (lastHeight % 100))
 
   if (latestBlock === lastHeight) {
-    if (lastHeight === columbus4EndHeight) 
+    if (lastHeight === columbus4EndHeight)
       throw new Error(`columbus-4 ended at height ${columbus4EndHeight}. Please change terraswap graph to the columbus-5 version`)
 
     await delay(500)
     return
   }
 
-  for (let height = lastHeight + 1; height <= latestBlock; height ++) {
-    const block = await getBlock(height).catch(errorHandler)
-    if (!block) return
+  for (let height = lastHeight + 1; height <= latestBlock; height++) {
+    const txs = await getTxsByHeight(height).catch(errorHandler)
+    if (!txs) return
 
-    if (height % 100 === 0){
-      exchangeRate = await getOracleExchangeRate(height)
+    if (height % 100 === 0) {
+      exchangeRate = await oracle.getExchangeRate(height)
     }
 
     await getManager().transaction(async (manager: EntityManager) => {
-      if (!(latestBlock === lastHeight && block[0] === undefined)) {
-        if(block[0] !== undefined){
-          await runIndexers(manager, block, exchangeRate, pairList, tokenList)
+      if (!(latestBlock === lastHeight && txs[0] === undefined)) {
+        if (txs[0] !== undefined) {
+          await runIndexers(manager, txs, exchangeRate, pairList, tokenList)
           height % 100 === 0 && await updateTerraswapData(manager)
         }
         await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))
@@ -66,7 +56,5 @@ export async function collect(
       await delete24hData(manager, new Date().valueOf())
     })
     if (height % 100 === 0) logger.info(`collected: ${height} / latest height: ${latestBlock}`)
-
-    await delay(100)
   }
 }

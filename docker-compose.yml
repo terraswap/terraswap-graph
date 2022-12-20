@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  db:
+    container_name: terraswap-graph-db
+    image: postgres:13
+    volumes:
+      - ./database/data:/var/lib/postgres
+    ports:
+      - ${DB_PORT:-5432}:5432
+    environment:
+      POSTGRES_USER: ${DB_USER:-terraswap_graph_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-terraswap_graph_password}
+      POSTGRES_DB: ${DB_DATABASE:-terraswap_graph}

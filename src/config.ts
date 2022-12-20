@@ -1,7 +1,7 @@
 const { SERVER_PORT } = process.env
 
 export function validateConfig(): void {
-  const keys = ['TERRA_LCD', 'TERRA_MANTLE', 'TERRA_CHAIN_ID']
+  const keys = ['TERRA_LCD', 'TERRA_CHAIN_ID', 'TERRA_RPC']
   for (const key of keys) {
     if (!process.env[key]) {
       throw new Error(`process.env.${key} is missing`)
