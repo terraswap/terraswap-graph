@@ -28,14 +28,20 @@ export class ClassicLcd implements Lcd {
       }
     }
 
-    const result = await this.classicLcd.get(`terra/wasm/v1beta1/contracts/${address}/store`,
+    try {
+      const result = await this.classicLcd.get(`terra/wasm/v1beta1/contracts/${address}/store`,
       {
         params: {
           query_msg: 'eyJ0b2tlbl9pbmZvIjp7fX0='
         }
-      })
-
-    return result.data?.query_result
+      })  
+      return result.data?.query_result
+    } catch (err: any) {
+      if (err.code === 2 && err.message?.includes('contract query failed: unknown request')) {
+        return undefined
+      }
+      throw err
+    }    
   }
 }
 
