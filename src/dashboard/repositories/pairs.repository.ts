@@ -67,9 +67,7 @@ export class DashboardPairsRepository {
       pairVolumes.forEach((p) => {
         const target = pairDict[p.pair]
         if (!target) return
-        target.volumeUst = p.volumeUst
-        target.token0Volume = p.token0Volume
-        target.token1Volume = p.token1Volume
+        target.dailyVolumeUst = p.volumeUst
       })
       return Object.values(pairDict)
     } catch (err: any) {

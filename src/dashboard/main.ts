@@ -40,7 +40,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
   app.enableCors({
     methods: ['GET'],
-    origin: ['https://app.terraswap.io', 'https://app-classic.terraswap.io', 'https://app-dev.terraswap.io', 'https://classic-app.terraswap.io'], 
+    origin: [/\.terraswap\.io$/, /\terraswap\.netlify.app$/], 
     optionsSuccessStatus: HttpStatus.OK,
   })
   app.useGlobalPipes(new ValidationPipe({ transform: true }))
