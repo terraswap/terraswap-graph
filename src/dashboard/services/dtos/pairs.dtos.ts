@@ -32,6 +32,8 @@ export class PairsDto {
 
   volumeUst: string
 
+  dailyVolumeUst?: string
+
   liquidityUst: string
 
   apr: string
