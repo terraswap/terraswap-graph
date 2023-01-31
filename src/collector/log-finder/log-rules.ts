@@ -238,6 +238,6 @@ export default {
   nonnativeTransferRuleFrom: target.nonnativeTransferRuleFrom,
   nativeTransferRule: target.nativeTransferRule,
   isParsable: (type: string): boolean => {
-    return type === 'transfer' || process.env.TERRA_CHAIN_ID?.includes("columbus-4") ? type === 'from_contract' : type === 'wasm'
+    return (type === 'transfer') || (process.env.TERRA_CHAIN_ID?.includes("columbus-4") ? type === 'from_contract' : type === 'wasm')
   }
 }
