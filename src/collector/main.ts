@@ -17,9 +17,19 @@ async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
+  const MAX_EXPONENTIAL_FACTOR = 10
+  let delay = 500
+  let errCount = 0
   for (; ;) {
-    await collect(pairList, tokenList).catch(errorHandlerWithSentry)
-    await bluebird.delay(500)
+    try {
+      await collect(pairList, tokenList)
+      errCount = 0
+    } catch (err: any) {
+      errorHandlerWithSentry(err)
+      errCount = errCount + 1 > MAX_EXPONENTIAL_FACTOR ? 0 : errCount + 1
+    }
+    delay = delay * 2 ** errCount
+    await bluebird.delay(delay)
   }
 }
 
