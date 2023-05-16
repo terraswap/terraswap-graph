@@ -14,14 +14,21 @@ export class Terra2Lcd implements Lcd {
         httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
         timeout: 2 * 1000,
     })
-
-    async getLatestBlockHeight(): Promise<number> {
+    private async getLatestBlockHeightLegacy(): Promise<number> {
         try {
             const res = await this.client.get(`${this.lcdUrl}/blocks/latest`)
             return parseInt(res.data.block.header.height)
         } catch (err) {
-            console.log(err)
-            throw new Error(`cannot get latest block height`)
+            throw new Error(`latestBlockHeight: ${err}`)
+        }
+    }
+
+    async getLatestBlockHeight(): Promise<number> {
+        try {
+            const res = await this.client.get(`${this.lcdUrl}/cosmos/base/tendermint/v1beta1/blocks/latest`)
+            return parseInt(res.data.block.header.height)
+        } catch (err) {
+            return await this.getLatestBlockHeightLegacy()
         }
     }
     async getTokenInfo(address: string): Promise<TokenInfo> {
