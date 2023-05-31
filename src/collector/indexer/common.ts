@@ -190,9 +190,7 @@ export async function comparePairReserve(em: EntityManager): Promise<void> {
       }
       let token0Amount = poolInfo.assets[0].amount
       let token1Amount = poolInfo.assets[1].amount
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (poolInfo.assets[1].info.native_token?.denom === pd.token_0 || poolInfo.assets[1].info.token?.contract_addr === pd.token_0) {
+      if (poolInfo.assets[1].info.native_token?.denom === pd.token0 || poolInfo.assets[1].info.token?.contract_addr === pd.token0) {
         token0Amount = poolInfo.assets[1].amount
         token1Amount = poolInfo.assets[0].amount
       }
