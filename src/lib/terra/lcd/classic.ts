@@ -48,12 +48,20 @@ export class ClassicLcd implements Lcd {
   }
 
   async getPoolInfo(address: string, height?: number): Promise<PoolInfo> {
+    let headers = {}
+    if (height) {
+        headers = { 
+            'x-cosmos-block-height': height,
+        }
+    }
+
     try {
       const result = await this.classicLcd.get(`terra/wasm/v1beta1/contracts/${address}/store`,
         {
           params: {
             query_msg: Buffer.from('{"pool":{}}').toString("base64")
-          }
+          },
+          headers
         })
       return result.data?.query_result
     } catch (err: any) {
