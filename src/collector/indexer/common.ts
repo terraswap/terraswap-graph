@@ -2,9 +2,11 @@ import { EntityManager } from 'typeorm'
 import { isNative } from 'lib/utils'
 import { isClassic } from 'lib/terra'
 import { baseCurrency } from 'lib/terraswap'
-import { PairDayDataEntity, PairInfoEntity, TokenInfoEntity } from 'orm'
+import { PairDayDataEntity, PairHourDataEntity, PairInfoEntity, TokenInfoEntity } from 'orm'
 import { ExchangeRate } from 'types'
 import { num } from 'lib/num'
+import { lcd } from 'lib/terra'
+import { getCollectedBlock } from 'collector/block'
 
 // get token's UST price from token-UST pair that have the largest liquidity
 export async function getTokenPriceAsUST(
@@ -147,7 +149,7 @@ async function _terra2TokenPrice(manager: EntityManager,
 
   while (tokenQueue.length > 0) {
     const target = tokenQueue.shift();
-    paths.get(target).forEach(p => {
+    paths.get(target)?.forEach(p => {
       const other = p.assets[0].token === target ? p.assets[1].token : p.assets[0].token;
       const otherPrice = _calculatePrice(p.assets, target, price[target].price);
       if (!price[other] || num(price[other].liquidity).lt(num(p.liquidity))) {
@@ -174,6 +176,56 @@ function _calculatePrice(assets: Asset[], target: string, targetPrice: string): 
   return num(assets[targetIdx].reserve).div(assets[otherIdx].reserve).multipliedBy(targetPrice).toString()
 }
 
+export async function comparePairReserve(em: EntityManager): Promise<void> {
+  const collectedBlock = (await getCollectedBlock()).height
+
+  const compare = async (pds: PairDayDataEntity[]) => {
+    const pdPromises = pds.map(async (pd) => {
+      let poolInfo;
+      try {
+        poolInfo = await lcd.getPoolInfo(pd.pair, collectedBlock)
+      } catch (err) {
+        console.log(`skip: pair ${pd.pair} pool info error ${err}`)
+        return
+      }
+      let token0Amount = poolInfo.assets[0].amount
+      let token1Amount = poolInfo.assets[1].amount
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      if (poolInfo.assets[1].info.native_token?.denom === pd.token_0 || poolInfo.assets[1].info.token?.contract_addr === pd.token_0) {
+        token0Amount = poolInfo.assets[1].amount
+        token1Amount = poolInfo.assets[0].amount
+      }
+      const lpAmount = poolInfo.total_share
+      if (pd.token0Reserve !== token0Amount) {
+        throw new Error(`pool ${pd.pair} different token_0_reserve ${pd.token0Reserve} ${token0Amount}`)
+      }
+      if (pd.token1Reserve !== token1Amount) {
+        throw new Error(`pool ${pd.pair} different token_1_reserve ${pd.token1Reserve} ${token1Amount}`)
+      }
+      if (pd.totalLpTokenShare !== lpAmount) {
+        throw new Error(`pool ${pd.pair} different lp ${pd.totalLpTokenShare} ${lpAmount}`)
+      }
+      return pd
+    })
+    await Promise.all(pdPromises)
+  }
+
+  const phds = await em.getRepository(PairHourDataEntity).createQueryBuilder()
+    .distinctOn(['pair'])
+    .orderBy('pair')
+    .addOrderBy('timestamp', 'DESC')
+    .getMany()
+
+  const pds = await em.getRepository(PairDayDataEntity).createQueryBuilder()
+    .distinctOn(['pair'])
+    .orderBy('pair')
+    .addOrderBy('timestamp', 'DESC')
+    .getMany()
+
+  await compare(phds)
+  await compare(pds)
+}
 
 export async function getPairList(manager: EntityManager): Promise<Record<string, boolean>> {
   const pairInfoRepo = manager.getRepository(PairInfoEntity)

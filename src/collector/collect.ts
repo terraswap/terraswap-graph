@@ -5,6 +5,7 @@ import { errorHandler } from 'lib/error'
 import * as logger from 'lib/logger'
 import { getCollectedBlock, updateBlock } from './block'
 import { runIndexers } from './indexer'
+import { comparePairReserve } from './indexer/common'
 import { delete24hData } from './deleteOldData'
 import { BlockEntity } from '../orm'
 import { updateTerraswapData } from './indexer/transferUpdater'
@@ -43,6 +44,7 @@ export async function collect(
 
     if (height % 100 === 0) {
       exchangeRate = await oracle.getExchangeRate(height)
+      await comparePairReserve(getManager())
     }
 
     await getManager().transaction(async (manager: EntityManager) => {

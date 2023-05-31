@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as http from 'http';
 import * as https from 'https';
 import { isNative } from 'lib/utils';
-import { Lcd, TokenInfo } from './interfaces';
+import { Lcd, PoolInfo, TokenInfo } from './interfaces';
 
 export class ClassicLcd implements Lcd {
 
@@ -46,5 +46,26 @@ export class ClassicLcd implements Lcd {
       throw err
     }
   }
+
+  async getPoolInfo(address: string, height?: number): Promise<PoolInfo> {
+    try {
+      const result = await this.classicLcd.get(`terra/wasm/v1beta1/contracts/${address}/store`,
+        {
+          params: {
+            query_msg: Buffer.from('{"pool":{}}').toString("base64")
+          }
+        })
+      return result.data?.query_result
+    } catch (err: any) {
+      if (err.isAxiosError && err.response?.status === 500) {
+        const res = err.response.data
+        if (res.code !== 0 && res.message?.includes('contract query failed: unknown request')) {
+          return undefined
+        }
+      }
+      throw err
+    }
+  }
+
 }
 
