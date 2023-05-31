@@ -27,7 +27,7 @@ export function createNonnativeTransferLogFinder(): ReturningLogFinderMapper<Non
       if (m.key === "to") {
         transformed.addresses.to = m.value
       }
-      if (m.key === "_contract_address") {
+      if (m.key === "_contract_address" || m.key === "contract_address") {
         transformed.assets.token = m.value
       }
       if (m.key === "amount") {

@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios'
 import * as http from 'http';
 import * as https from 'https';
 import { isNative } from 'lib/utils';
-import { Lcd, TokenInfo } from './interfaces';
+import { Lcd, PoolInfo, TokenInfo } from './interfaces';
 
 
 export class Terra2Lcd implements Lcd {
@@ -33,6 +33,21 @@ export class Terra2Lcd implements Lcd {
     }
     async getTokenInfo(address: string): Promise<TokenInfo> {
         return isNative(address) ? await this.getNativeTokenInfo(address) : await this.getCw20Info(address)
+    }
+
+    async getPoolInfo(address: string, height?: number): Promise<PoolInfo> {
+        let headers = {}
+        if (height) {
+            headers = { 
+                'x-cosmos-block-height': height,
+            }
+        }
+
+        const query_data = Buffer.from('{"pool":{}}').toString("base64")
+        const result = await this.client.get(`${this.lcdUrl}/cosmwasm/wasm/v1/contract/${address}/smart/${query_data}`, {
+            headers
+        })
+        return result.data?.data
     }
 
     private async getNativeTokenInfo(denom: string): Promise<TokenInfo> {
