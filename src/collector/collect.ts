@@ -56,7 +56,7 @@ export async function collect(
       }
       await delete24hData(manager, new Date().valueOf())
       if (height % 100 === 0) {
-        await comparePairReserve(manager)
+        await comparePairReserve(height, manager)
       }
     })
     if (height % 100 === 0) logger.info(`collected: ${height} / latest height: ${latestBlock}`)

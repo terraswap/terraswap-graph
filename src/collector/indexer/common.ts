@@ -6,7 +6,6 @@ import { PairDayDataEntity, PairHourDataEntity, PairInfoEntity, TokenInfoEntity 
 import { ExchangeRate } from 'types'
 import { num } from 'lib/num'
 import { lcd } from 'lib/terra'
-import { getCollectedBlock } from 'collector/block'
 
 // get token's UST price from token-UST pair that have the largest liquidity
 export async function getTokenPriceAsUST(
@@ -176,14 +175,13 @@ function _calculatePrice(assets: Asset[], target: string, targetPrice: string): 
   return num(assets[targetIdx].reserve).div(assets[otherIdx].reserve).multipliedBy(targetPrice).toString()
 }
 
-export async function comparePairReserve(em: EntityManager): Promise<void> {
-  const collectedBlock = (await getCollectedBlock()).height
+export async function comparePairReserve(height: number, em: EntityManager): Promise<void> {
 
   const compare = async (pds: PairDayDataEntity[]) => {
     const pdPromises = pds.map(async (pd) => {
       let poolInfo;
       try {
-        poolInfo = await lcd.getPoolInfo(pd.pair, collectedBlock)
+        poolInfo = await lcd.getPoolInfo(pd.pair, height)
       } catch (err) {
         console.log(`skip: pair ${pd.pair} pool info error ${err}`)
         return
