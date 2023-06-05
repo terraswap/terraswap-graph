@@ -7,11 +7,24 @@ import { TxHistoryIndexer } from './txHistoryIndexer'
 import { NativeTransferIndexer, NonnativeTransferIndexer } from './transferIndexer'
 import { factoryAddress } from 'lib/terraswap/'
 import logRules from '../log-finder/log-rules'
+import { EventKV } from '@terra-money/terra.js'
 
 
 const createPairLF = createCreatePairLogFinders(factoryAddress)
 const nativeTransferLF = createNativeTransferLogFinders()
 const nonnativeTransferLF = createNonnativeTransferLogFinder()
+
+function sortNativeTransferAttributes(attrs: EventKV[]): EventKV[] {
+  let startIdx = 0
+  const splitEvery = 3
+  const sorted: EventKV[] = []
+
+  while (startIdx < attrs.length) {
+    sorted.push(...(attrs.slice(startIdx, startIdx + splitEvery).sort((a, b) => a.key < b.key ? -1 : 1)))
+    startIdx += splitEvery
+  }
+  return sorted
+}
 
 export async function runIndexers(
   manager: EntityManager,
@@ -41,10 +54,13 @@ export async function runIndexers(
 
           spwfLogFounds.length > 0 && await TxHistoryIndexer(manager, exchangeRate, timestamp, txHash, spwfLogFounds)
 
-          // native transfer
-          const nativeTransferLogFounds = nativeTransferLF(event)
+          if (event.type === "transfer") {
+            event.attributes = sortNativeTransferAttributes(event.attributes)
+            // native transfer
+            const nativeTransferLogFounds = nativeTransferLF(event)
 
-          await NativeTransferIndexer(pairList, manager, exchangeRate, timestamp, nativeTransferLogFounds)
+            await NativeTransferIndexer(pairList, manager, exchangeRate, timestamp, nativeTransferLogFounds)
+          }
 
           // nonnative transfer
           const nonnativeTransferLogFounds = nonnativeTransferLF(event)

@@ -7,14 +7,31 @@ export function createNativeTransferLogFinders(): ReturningLogFinderMapper<
   NativeTransferTransformed[]
 > {
   return createReturningLogFinder(logRules.nativeTransferRule(), (_, match) => {
-    if (!match[2].value) {
+    let amountString = ''
+    let sender = ''
+    let recipient = ''
+
+    match.forEach(m => {
+      if (m.key === 'amount') {
+        amountString = m.value
+      }
+      if (m.key === 'sender') {
+        sender = m.value
+      }
+      if (m.key === 'recipient') {
+        recipient = m.value
+      }
+    })
+
+    if (!amountString) {
       return
     }
-    const assetsInfo = trimAssets(match[2].value, true)
+
+    const assetsInfo = trimAssets(amountString, true)
     return assetsInfo.map((asset) => {
       return {
-        recipient: match[0].value,
-        sender: match[1].value,
+        recipient,
+        sender,
         assets: asset,
       }
     })

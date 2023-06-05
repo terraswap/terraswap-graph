@@ -61,10 +61,10 @@ function nonnativeTransferRuleFromV2(): LogFinderRule {
   }
 }
 
-function nativeTransferRuleV2(): LogFinderRule {
+function sortedNativeTransferRuleFinderRule(): LogFinderRule {
   return {
     type: 'transfer',
-    attributes: [['recipient'], ['sender'], ['amount']],
+    attributes: [['amount'], ['recipient'], ['sender']],
   }
 }
 
@@ -73,7 +73,7 @@ const phoenix = {
   spwRule: spwRuleV2,
   nonnativeTransferRule: nonnativeTransferRuleV2,
   nonnativeTransferRuleFrom: nonnativeTransferRuleFromV2,
-  nativeTransferRule: nativeTransferRuleV2,
+  nativeTransferRule: sortedNativeTransferRuleFinderRule,
 }
 
 
@@ -137,10 +137,10 @@ function nonnativeTransferRuleFrom(): LogFinderRule {
   }
 }
 
-function nativeTransferRule(): LogFinderRule {
+function sortedNativeTransferRule(): LogFinderRule {
   return {
     type: 'transfer',
-    attributes: [['recipient'], ['sender'], ['amount']],
+    attributes: [['amount'], ['recipient'], ['sender']],
   }
 }
 
@@ -149,7 +149,7 @@ const classic = {
   spwRule: spwRule,
   nonnativeTransferRule: nonnativeTransferRule,
   nonnativeTransferRuleFrom: nonnativeTransferRuleFrom,
-  nativeTransferRule: nativeTransferRule,
+  nativeTransferRule: sortedNativeTransferRule,
 }
 
 
@@ -213,10 +213,10 @@ export function col4NonnativeTransferRuleFrom(): LogFinderRule {
   }
 }
 
-export function col4NativeTransferRule(): LogFinderRule {
+export function col4SortedNativeTransferRule(): LogFinderRule {
   return {
     type: 'transfer',
-    attributes: [['recipient'], ['sender'], ['amount']],
+    attributes: [['amount'], ['recipient'], ['sender']],
   }
 }
 
@@ -226,7 +226,7 @@ const columbus4 = {
   spwRule: col4SpwRule,
   nonnativeTransferRule: col4NonnativeTransferRule,
   nonnativeTransferRuleFrom: col4NonnativeTransferRuleFrom,
-  nativeTransferRule: col4NativeTransferRule,
+  nativeTransferRule: col4SortedNativeTransferRule,
 }
 
 const target = process.env.TERRA_CHAIN_ID?.includes("phoenix") ? phoenix : process.env.TERRA_CHAIN_ID?.includes("columbus-4") ? columbus4 : classic
