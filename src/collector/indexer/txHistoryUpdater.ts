@@ -50,11 +50,11 @@ export async function updateVolume24h(
       token0: isRightOrder ? transformed.assets[0].token : transformed.assets[1].token,
       token1: isRightOrder ? transformed.assets[1].token : transformed.assets[0].token,
       token0Volume: isRightOrder
-        ? Math.abs(Number(transformed.assets[0].amount)).toString()
-        : Math.abs(Number(transformed.assets[1].amount)).toString(),
+        ? num(transformed.assets[0].amount).abs().toString()
+        : num(transformed.assets[1].amount).abs().toString(),
       token1Volume: isRightOrder
-        ? Math.abs(Number(transformed.assets[1].amount)).toString()
-        : Math.abs(Number(transformed.assets[0].amount)).toString(),
+        ? num(transformed.assets[1].amount).abs().toString()
+        : num(transformed.assets[0].amount).abs().toString(),
       volumeUst: await changeVolumeAsUST(manager, new Date(timestamp), transformed, exchangeRate),
     })
   )
@@ -110,7 +110,7 @@ export async function updateLpTokenShare(
 
   if (!lastData) return
 
-  lastData.totalLpTokenShare = (Number(lastData.totalLpTokenShare) + Number(shareDiff)).toString()
+  lastData.totalLpTokenShare = num(lastData.totalLpTokenShare).plus(num(shareDiff)).toString()
 
   return pairRepo.save(lastData)
 }
@@ -235,13 +235,13 @@ async function updatePairVolume(
   ])
 
   lastData.token0Volume = (
-    Number(lastData.token0Volume) +
-    Math.abs(Number(isRightOrder ? transformed.assets[0].amount : transformed.assets[1].amount))
+    num(lastData.token0Volume).plus(
+      num(isRightOrder ? transformed.assets[0].amount : transformed.assets[1].amount).abs())
   ).toString()
 
   lastData.token1Volume = (
-    Number(lastData.token1Volume) +
-    Math.abs(Number(isRightOrder ? transformed.assets[1].amount : transformed.assets[0].amount))
+    num(lastData.token1Volume).plus(
+      num(isRightOrder ? transformed.assets[1].amount : transformed.assets[0].amount).abs())
   ).toString()
 
   const newVolumeUST = await changeVolumeAsUST(
@@ -251,7 +251,7 @@ async function updatePairVolume(
     exchangeRate
   )
 
-  lastData.volumeUst = (Number(lastData.volumeUst) + Number(newVolumeUST)).toString()
+  lastData.volumeUst = num(lastData.volumeUst).plus(num(newVolumeUST)).toString()
 
   return pairRepo.save(lastData)
 }

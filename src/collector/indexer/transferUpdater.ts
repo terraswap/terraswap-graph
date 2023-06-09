@@ -62,12 +62,12 @@ export async function getLatestReserve(manager: EntityManager, pair: string): Pr
 export function addReserve(reserve: Reserve, transformedAsset: Asset): Reserve {
   const token0Reserve =
     reserve.token0 === transformedAsset.token
-      ? (Number(reserve.token0Reserve) + Number(transformedAsset.amount)).toString()
+      ? num(reserve.token0Reserve).plus(num(transformedAsset.amount)).toString()
       : reserve.token0Reserve
 
   const token1Reserve =
     reserve.token1 === transformedAsset.token
-      ? (Number(reserve.token1Reserve) + Number(transformedAsset.amount)).toString()
+      ? num(reserve.token1Reserve).plus(num(transformedAsset.amount)).toString()
       : reserve.token1Reserve
 
   return {
@@ -208,15 +208,15 @@ export async function updateTerraswapData(
     .getRawMany()
 
   let sum = {
-    liquidity: 0,
-    volume: 0,
+    liquidity: num(0),
+    volume: num(0),
     txns: 0,
   }
 
   for (const data of todayData) {
-    sum.liquidity += Number(data.liquidity_ust)
+    sum.liquidity = sum.liquidity.plus(num(data.liquidity_ust))
     if (data.timestamp.valueOf() === lastData[0].timestamp.valueOf()) {
-      sum.volume += Number(data.volume_ust)
+      sum.volume = sum.volume.plus(num(data.volume_ust))
       sum.txns += data.txns
     }
   }
@@ -238,15 +238,15 @@ export async function updateTerraswapData(
       .getRawMany()
 
     sum = {
-      liquidity: 0,
-      volume: 0,
+      liquidity: num(0),
+      volume: num(0),
       txns: 0,
     }
 
     for (const data of lastDayData) {
-      sum.liquidity += Number(data.liquidity_ust)
+      sum.liquidity = sum.liquidity.plus(num(data.liquidity_ust))
       if (data.timestamp.valueOf() === lastData[1].timestamp.valueOf()) {
-        sum.volume += Number(data.volume_ust)
+        sum.volume = sum.volume.plus(num(data.volume_ust))
         sum.txns += data.txns
       }
     }

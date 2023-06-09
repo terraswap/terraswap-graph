@@ -6,13 +6,14 @@ import { Recent24hEntity, TerraswapDayDataEntity } from 'orm'
 import { TerraswapData, TerraswapHistoricalData } from 'graphql/schema/TerraswapDayData'
 import { dateToNumber, numberToDate } from 'lib/utils'
 import { Cycle } from 'types'
+import { num } from 'lib/num'
 
 @Service()
 export class TerraswapService {
   constructor(
     @InjectRepository(TerraswapDayDataEntity) private readonly terraswapRepo: Repository<TerraswapDayDataEntity>,
     @InjectRepository(Recent24hEntity) private readonly recent24hRepo: Repository<Recent24hEntity>
-  ) {}
+  ) { }
 
   async getTerraswap(
     recent24hRepo = this.recent24hRepo,
@@ -27,14 +28,14 @@ export class TerraswapService {
       select: ['volumeUst']
     })
 
-    let voluem24h = 0
+    let volume24h = num(0)
 
     for (const volume of recent24hData) {
-      voluem24h += Number(volume.volumeUst)
+      volume24h = volume24h.plus(num(volume.volumeUst))
     }
 
     return {
-      volumeUST24h: voluem24h.toString(),
+      volumeUST24h: volume24h.toString(),
       liquidityUST: latestData.totalLiquidityUst
     }
   }
