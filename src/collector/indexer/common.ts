@@ -105,13 +105,6 @@ async function _terra2TokenPrice(manager: EntityManager,
   const price: { [key: string]: UstPrice } = {};
   price[token] = { price: "0", liquidity: "0" };
 
-  const possible = await manager.getRepository(PairInfoEntity).createQueryBuilder()
-    .where(`token_0 = :token0 OR token_1 = :token1`, { token0: baseCurrency, token1: baseCurrency })
-    .getCount();
-  if (!possible) {
-    return price[token];
-  }
-
   const paths: Map<string, Set<PairData>> = new Map();
   const pairs = await manager.getRepository(PairDayDataEntity).createQueryBuilder()
     .distinctOn(['pair'])
@@ -120,7 +113,6 @@ async function _terra2TokenPrice(manager: EntityManager,
     .orderBy("pair", "ASC")
     .addOrderBy("timestamp", "DESC")
     .getMany();
-
 
   let biggestLiquidity = num(0);
   price[baseCurrency] = { price: "1", liquidity: biggestLiquidity.toString() };
@@ -148,7 +140,7 @@ async function _terra2TokenPrice(manager: EntityManager,
 
   while (tokenQueue.length > 0) {
     const target = tokenQueue.shift();
-    paths.get(target)?.forEach(p => {
+      paths.get(target)?.forEach(p => {
       const other = p.assets[0].token === target ? p.assets[1].token : p.assets[0].token;
       const otherPrice = _calculatePrice(p.assets, target, price[target].price);
       if (!price[other] || num(price[other].liquidity).lt(num(p.liquidity))) {
