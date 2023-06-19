@@ -10,10 +10,6 @@ import logRules from '../log-finder/log-rules'
 import { EventKV } from '@terra-money/terra.js'
 
 
-const createPairLF = createCreatePairLogFinders(factoryAddress)
-const nativeTransferLF = createNativeTransferLogFinders()
-const nonnativeTransferLF = createNonnativeTransferLogFinder()
-
 function sortNativeTransferAttributes(attrs: EventKV[]): EventKV[] {
   let startIdx = 0
   const splitEvery = 3
@@ -31,7 +27,8 @@ export async function runIndexers(
   txs: Tx[],
   exchangeRate: ExchangeRate | undefined,
   pairList: Record<string, boolean>,
-  tokenList: Record<string, boolean>
+  tokenList: Record<string, boolean>,
+  height: number
 ): Promise<void> {
   for (const tx of txs) {
     const Logs = tx.logs
@@ -45,11 +42,11 @@ export async function runIndexers(
         // for spam tx
         if (logRules.isParsable(event.type)) {
           // createPair
-          const createPairLogFounds = createPairLF(event)
+          const createPairLogFounds = createCreatePairLogFinders(factoryAddress, height)(event)
           createPairLogFounds.length > 0 && await CreatePairIndexer(pairList, tokenList, manager, timestamp, createPairLogFounds)
 
           // txHistory
-          const spwfLF = createSPWFinder(pairList)
+          const spwfLF = createSPWFinder(pairList, height)
           const spwfLogFounds = spwfLF(event)
 
           spwfLogFounds.length > 0 && await TxHistoryIndexer(manager, exchangeRate, timestamp, txHash, spwfLogFounds)
@@ -57,13 +54,13 @@ export async function runIndexers(
           if (event.type === "transfer") {
             event.attributes = sortNativeTransferAttributes(event.attributes)
             // native transfer
-            const nativeTransferLogFounds = nativeTransferLF(event)
+            const nativeTransferLogFounds = createNativeTransferLogFinders(height)(event)
 
             await NativeTransferIndexer(pairList, manager, exchangeRate, timestamp, nativeTransferLogFounds)
           }
 
           // nonnative transfer
-          const nonnativeTransferLogFounds = nonnativeTransferLF(event)
+          const nonnativeTransferLogFounds = createNonnativeTransferLogFinder(height)(event)
 
           await NonnativeTransferIndexer(pairList, tokenList, manager, timestamp, exchangeRate, nonnativeTransferLogFounds)
         }

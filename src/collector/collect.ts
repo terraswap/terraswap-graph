@@ -49,7 +49,7 @@ export async function collect(
     await getManager().transaction(async (manager: EntityManager) => {
       if (!(latestBlock === lastHeight && txs[0] === undefined)) {
         if (txs[0] !== undefined) {
-          await runIndexers(manager, txs, exchangeRate, pairList, tokenList)
+          await runIndexers(manager, txs, exchangeRate, pairList, tokenList, height)
           height % 100 === 0 && await updateTerraswapData(manager)
         }
         await updateBlock(collectedBlock, height, manager.getRepository(BlockEntity))

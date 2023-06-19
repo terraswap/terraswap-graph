@@ -3,8 +3,8 @@ import { NonnativeTransferTransformed } from 'types'
 import logRules from './log-rules'
 import { num } from 'lib/num'
 
-export function createNonnativeTransferLogFinder(): ReturningLogFinderMapper<NonnativeTransferTransformed> {
-  return createReturningLogFinder(logRules.nonnativeTransferRule(), (_, match) => {
+export function createNonnativeTransferLogFinder(height?: number): ReturningLogFinderMapper<NonnativeTransferTransformed> {
+  return createReturningLogFinder(logRules.nonnativeTransferRule(height), (_, match) => {
     if (match[4]?.key === 'by') {
       return columbus4Mapper(match)
     }

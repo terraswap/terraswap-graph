@@ -3,10 +3,10 @@ import { trimAssets } from 'lib/utils'
 import { NativeTransferTransformed } from 'types'
 import logRules from './log-rules'
 
-export function createNativeTransferLogFinders(): ReturningLogFinderMapper<
+export function createNativeTransferLogFinders(height?: number): ReturningLogFinderMapper<
   NativeTransferTransformed[]
 > {
-  return createReturningLogFinder(logRules.nativeTransferRule(), (_, match) => {
+  return createReturningLogFinder(logRules.nativeTransferRule(height), (_, match) => {
     let amountString = ''
     let sender = ''
     let recipient = ''

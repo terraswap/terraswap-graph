@@ -3,7 +3,7 @@ import { trimAssets, addMinus } from 'lib/utils'
 import { TxHistoryTransformed } from 'types'
 import logRules from './log-rules'
 
-type asset = {token: string; amount: string}
+type asset = { token: string; amount: string }
 
 enum SwapMessageKey {
   contractAddress = '_contract_address',
@@ -18,26 +18,27 @@ enum SwapMessageKey {
   commissionAmount = 'commission_amount',
 }
 enum ProvideMessageKey {
-  contractAddress= '_contract_address',
-  action= 'action',
-  sender= 'sender',
-  receiver= 'receiver',
-  assets= 'assets',
-  share= 'share'
+  contractAddress = '_contract_address',
+  action = 'action',
+  sender = 'sender',
+  receiver = 'receiver',
+  assets = 'assets',
+  share = 'share'
 }
 
 enum WithdrawMessageKey {
-contractAddress = '_contract_address'	,
-action = 'action'	,
-refundAssets = 'refund_assets',
-sender = 'sender'	,
-withdrawnShare = 'withdrawn_share'	
+  contractAddress = '_contract_address',
+  action = 'action',
+  refundAssets = 'refund_assets',
+  sender = 'sender',
+  withdrawnShare = 'withdrawn_share'
 
 }
 function createLegacySPWFinder(
-  pairAddresses: Record<string, boolean>
+  pairAddresses: Record<string, boolean>,
+  height: number,
 ): ReturningLogFinderMapper<TxHistoryTransformed> {
-  return createReturningLogFinder(logRules.spwRule(), (_, match) => {
+  return createReturningLogFinder(logRules.spwRule(height), (_, match) => {
     if (pairAddresses[match[0].value]) {
       const action = match[1].value
       let assets = [
@@ -79,7 +80,7 @@ function createLegacySPWFinder(
 }
 
 
- function createNewSPWFinder(
+function createNewSPWFinder(
   pairAddresses: Record<string, boolean>
 ): ReturningLogFinderMapper<TxHistoryTransformed> {
   return createReturningLogFinder(logRules.spwRule(), (_, match) => {
@@ -101,13 +102,13 @@ function createLegacySPWFinder(
         assets = swapMatchToAssets(match)
       } else if (action === 'provide_liquidity') {
         const assetMsg = match.find((m) => m.key === ProvideMessageKey.assets)
-        if (assetMsg){
+        if (assetMsg) {
           assets = trimAssets(assetMsg.value, true)
         }
         share = matchesToShare(match, ProvideMessageKey.share)
       } else if (action === 'withdraw_liquidity') {
         const assetMsg = match.find((m) => m.key === WithdrawMessageKey.refundAssets)
-        if (assetMsg){
+        if (assetMsg) {
           assets = trimAssets(assetMsg.value, false)
         }
         share = matchesToShare(match, WithdrawMessageKey.withdrawnShare)
@@ -156,7 +157,7 @@ function swapMatchToAssets(matches: Attribute[]): asset[] {
   return assets
 }
 
-function matchesToShare(matched: Attribute[],  targetKey: string): string {
+function matchesToShare(matched: Attribute[], targetKey: string): string {
   let share = '0'
   matched.forEach((match) => {
     if (match.key === targetKey) {
