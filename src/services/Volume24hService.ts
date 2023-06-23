@@ -1,18 +1,17 @@
 import memoize from 'memoizee-decorator'
-import { Service, Inject, Container } from 'typedi'
+import { Service, Container } from 'typedi'
 import { Repository } from 'typeorm'
 import { InjectRepository } from 'typeorm-typedi-extensions'
 import { PairInfoEntity, Recent24hEntity } from 'orm'
 import { Volume24h } from 'graphql/schema'
-import { TokenService } from './TokenService'
+import { num } from 'lib/num'
 
 @Service()
 export class Volume24hService {
   constructor(
     @InjectRepository(Recent24hEntity) private readonly repo: Repository<Recent24hEntity>,
-    @InjectRepository(PairInfoEntity) private readonly pairRepo: Repository<PairInfoEntity>,
-    @Inject((type) => TokenService) private readonly tokenService: TokenService
-  ) {}
+    @InjectRepository(PairInfoEntity) private readonly pairRepo: Repository<PairInfoEntity>
+  ) { }
 
   @memoize({ promise: true, maxAge: 600000, primitive: true, length: 1 })
   async getVolume24h(
@@ -23,14 +22,14 @@ export class Volume24hService {
     const recent = await repo.find({ where: { pair } })
     const pairInfo = await pairRepo.findOne({ where: { pair } })
     if (!pairInfo) return
-    if (!recent[0]){
+    if (!recent[0]) {
       return {
         token0Volume: '0',
         token1Volume: '0',
         volumeUST: '0',
       }
     }
-    
+
     return {
       token0Volume: sumVolume(Key.TOKEN_0_VOLUME, recent).toString(),
       token1Volume: sumVolume(Key.TOKEN_1_VOLUME, recent).toString(),
@@ -40,9 +39,9 @@ export class Volume24hService {
 }
 
 function sumVolume(key: Key, recentData: Recent24hEntity[]) {
-  let sum = 0
+  let sum = num(0)
   for (const tx of recentData) {
-    sum += Number(tx[key])
+    sum = sum.plus(num(tx[key]))
   }
   return sum
 }

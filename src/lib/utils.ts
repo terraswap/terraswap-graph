@@ -1,5 +1,6 @@
 import { Cycle } from 'types'
 import { ParamsError } from '../lib/error'
+import { num } from './num'
 
 interface AssetInfo {
   token: string
@@ -13,7 +14,7 @@ export function addMinus(n: string): string {
 export function trimAssets(rawAssets: string, inflow: boolean): AssetInfo[] {
   // if assets === null
   if (!rawAssets) return []
-  
+
   const assets = rawAssets.split(',').map((e) => e.trim())
   return assets
     .map((e) => {
@@ -53,8 +54,8 @@ export function numberToDate(timestamp: number, cycle: number): Date {
 }
 
 export function stringToDate(timestamp: string, cycle: number): Date {
-  const timestampNumber = new Date(timestamp).valueOf() 
-  return new Date(timestampNumber- (timestampNumber % cycle))
+  const timestampNumber = new Date(timestamp).valueOf()
+  return new Date(timestampNumber - (timestampNumber % cycle))
 }
 
 export function dateToNumber(timestamp: Date): number {
@@ -69,7 +70,7 @@ export function floorDate(timestamp: number, cycle: number): number {
 export function compareLiquidity(liquidity0: string, liquidity1: string): boolean {
   if (liquidity0 === 'native') return true
   if (liquidity1 === 'native') return false
-  return Number(liquidity0) > Number(liquidity1)
+  return num(liquidity0) > num(liquidity1)
 }
 
 export function rangeLimit(from: number, to: number, cycle: Cycle, limit: number): void {
