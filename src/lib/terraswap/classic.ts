@@ -5,7 +5,6 @@ import axios, { Axios, AxiosRequestHeaders } from "axios";
 import { factoryAddress, Pair, PairRes, PoolInfoRes } from './terraswap';
 
 export class ColumbusTerraswap {
-    private readonly USX_ADDR = process.env.STABLE_COIN_ADDR;
     private axios: Axios;
     constructor(lcdUrl = process.env.TERRA_LCD) {
         this.axios = axios.create({
@@ -53,12 +52,8 @@ export class ColumbusTerraswap {
             'x-cosmos-block-height': `${height}`
         }
         try {
-            const res = await this.axios.get(`/terra/wasm/v1beta1/contracts/${contract}/store`, {
-                headers, params: {
-                    query_msg: data
-                }
-            })
-            return res.data?.query_result
+            const res = await this.axios.get(`/cosmwasm/wasm/v1/contract/${contract}/smart/${data}`, { headers })
+            return res.data.data
         } catch (err) {
             console.log(err)
         }
