@@ -13,9 +13,17 @@ const querier = {
       params: { height },
     })
 
+    if (block.status !== 200) {
+      throw new Error(`Failed to get block results for height ${height}, ${block.data}`)
+    }
+
     const blockResults = await rpc.get(`/block_results`, {
       params: { height },
     })
+
+    if (blockResults.status !== 200) {
+      throw new Error(`Failed to get block results for height ${height}, ${blockResults.data}`)
+    }
     const blockData = JSON.parse(block.data)
     const txTimestamp = blockData.result.block.header.time
 
@@ -27,13 +35,13 @@ const querier = {
       const txHashStr = hashToHex(txString)
       const txResult = blockResultsData.result?.txs_results[idx]
       let logs = []
-      if (txResult.code === 0 ) {
+      if (txResult.code === 0) {
         logs = JSON.parse(txResult.log)
       }
       txs.push({
-        height, 
+        height,
         timestamp: txTimestamp,
-        txhash:txHashStr,
+        txhash: txHashStr,
         logs
       })
     })

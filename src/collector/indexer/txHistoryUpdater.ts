@@ -64,7 +64,8 @@ export async function addTxHistory(
   manager: EntityManager,
   timestamp: string,
   txHash: string,
-  transformed: TxHistoryTransformed
+  transformed: TxHistoryTransformed,
+  sender: string,
 ): Promise<TxHistoryEntity> {
   const txHistoryRepo = manager.getRepository(TxHistoryEntity)
 
@@ -82,6 +83,7 @@ export async function addTxHistory(
     token0Amount: isRightOrder ? transformed.assets[0].amount : transformed.assets[1].amount,
     token1: isRightOrder ? transformed.assets[1].token : transformed.assets[0].token,
     token1Amount: isRightOrder ? transformed.assets[1].amount : transformed.assets[0].amount,
+    sender,
   })
 
   return txHistoryRepo.save(txHistory)

@@ -1,5 +1,6 @@
 export interface Tx {
   txhash: string
+  sender?: string 
   timestamp: string
   height: number
   logs: {
