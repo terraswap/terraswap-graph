@@ -1,6 +1,7 @@
 import * as sentry from '@sentry/node'
 import * as logger from 'lib/logger'
 import { ParamsError } from '.'
+import { AxiosError } from 'axios'
 
 export function init(
   opts: {
@@ -24,12 +25,18 @@ export function init(
   })
 }
 
-export function errorHandlerWithSentry(error?: Error): void {
-  if (error) {
-    logger.error(error)
+export function errorHandlerWithSentry(err?: AxiosError | Error): void {
+  if (err) {
+    logger.error(err)
+
+    // avoid sentry error for 404
+    if ("isAxiosError" in err && err.response?.status === 404) {
+      return
+    }
+
     // do not send Params Error to sentry
-    if (!(error instanceof ParamsError)) {
-      sentry.captureException(error)
+    if (!(err instanceof ParamsError)) {
+      sentry.captureException(err)
     }
   }
 }
