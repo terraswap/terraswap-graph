@@ -1,10 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import * as http from 'http';
 import * as https from 'https';
-import { FcdContractMsgSenderRes, fcd } from './interfaces';
+import { ClassicFcdContractMsgSenderRes, fcd } from './interfaces';
 
 
-export class Fcd implements fcd {
+export class ClassicFcd implements fcd {
     private url = process.env.TERRA_FCD || 'http://localhost:8080'
     private client: AxiosInstance;
 
@@ -27,7 +27,7 @@ export class Fcd implements fcd {
 
     async getContractMsgSender(hash: string, contract: string): Promise<string> {
         try {
-            const result = await this.client.get<FcdContractMsgSenderRes>(`${this.url}/v1/tx/${hash}`)
+            const result = await this.client.get<ClassicFcdContractMsgSenderRes>(`${this.url}/v1/tx/${hash}`)
             let sender: string;
             let found = false;
             for (let i = 0; i < result.data?.tx?.value?.msg.length && !found; i++) {

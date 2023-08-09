@@ -2,7 +2,7 @@ export interface fcd {
   getContractMsgSender(hash: string, contract: string): Promise<string>
 }
 
-export interface FcdContractMsgSenderRes {
+export interface ClassicFcdContractMsgSenderRes {
   tx: {
     value: {
       msg: {
@@ -16,4 +16,20 @@ export interface FcdContractMsgSenderRes {
   }
   height: string
   txhash: string
+}
+
+export interface MainnetFcdContractMsgSenderRes {
+  tx: {
+    body: {
+      messages: {
+        '@type': string
+        sender: string
+        contract?: string
+      }[]
+    }
+  }
+  tx_response: {
+    height: string
+    txhash: string
+  }
 }

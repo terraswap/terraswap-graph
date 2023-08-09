@@ -5,7 +5,7 @@ import { isNative } from 'lib/utils';
 import { Lcd, LcdContractMsgSenderRes, PoolInfo, TokenInfo } from './interfaces';
 
 
-export class Terra2Lcd implements Lcd {
+export class MainnetLcd implements Lcd {
     private assetInfoUrl = "https://assets.terra.money/ibc/tokens.json"
     private url = process.env.TERRA_LCD || 'https://phoenix-lcd.terra.dev'
     private client: AxiosInstance

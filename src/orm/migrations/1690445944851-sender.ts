@@ -1,6 +1,8 @@
 import { isClassic } from 'lib/terra';
-import { Fcd } from 'lib/terra/fcd/fcd';
-import { Terra2Lcd } from 'lib/terra/lcd/terra2';
+import { ClassicFcd } from 'lib/terra/fcd/classic';
+import { MainnetFcd } from 'lib/terra/fcd/mainnet';
+import { ClassicLcd } from 'lib/terra/lcd/classic';
+import { MainnetLcd } from 'lib/terra/lcd/mainnet';
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class sender1690445944851 implements MigrationInterface {
@@ -35,7 +37,7 @@ export class sender1690445944851 implements MigrationInterface {
             await queryRunner.commitTransaction();
         } catch (err) {
             await queryRunner.rollbackTransaction();
-            return console.error(err)
+            throw err
         }
         let lastId = 0;
         const limit = 1000;
@@ -58,9 +60,11 @@ export class sender1690445944851 implements MigrationInterface {
                 }
                 lastId = txs[txs.length - 1].id;
                 const target = isClassic ? terraApi.classic : terraApi.mainnet;
-                const clients = [
-                    new Fcd(target.limited.fcd), new Terra2Lcd(target.limited.lcd), new Terra2Lcd(target.nonLimited.lcd)
-                ]
+                const clients = isClassic ? [
+                    new ClassicFcd(target.limited.fcd), new ClassicLcd(target.limited.lcd), new ClassicLcd(target.nonLimited.lcd)
+                ] : [
+                    new MainnetFcd(target.limited.fcd), new MainnetLcd(target.limited.lcd), new MainnetLcd(target.nonLimited.lcd)
+                ];
                 const resPromises = txs.map(async (tx, txIdx) => {
                     if (txIdx % 10 === 0) {
                         await new Promise(resolve => setTimeout(resolve, 10 * 1000))
@@ -69,6 +73,9 @@ export class sender1690445944851 implements MigrationInterface {
                         const api = clients[idx]
                         try {
                             const res = await api.getContractMsgSender(tx.tx_hash, tx.pair)
+                            if (!res) {
+                                continue
+                            }
                             return {
                                 id: tx.id,
                                 sender: res
@@ -90,8 +97,10 @@ export class sender1690445944851 implements MigrationInterface {
                 });
                 await Promise.all(updatePromises)
                 await queryRunner.commitTransaction();
+                console.log(`last commit id: ${lastId}`)
             } catch (err) {
                 queryRunner.rollbackTransaction();
+                throw err
             }
         }
     }
