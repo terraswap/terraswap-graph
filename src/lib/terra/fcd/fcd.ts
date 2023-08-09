@@ -5,10 +5,8 @@ import { FcdContractMsgSenderRes, fcd } from './interfaces';
 
 
 export class Fcd implements fcd {
-
     private url = process.env.TERRA_FCD || 'http://localhost:8080'
-
-    private fcd: AxiosInstance;
+    private client: AxiosInstance;
 
     constructor(url?: string, config?: AxiosRequestConfig) {
         if (url) {
@@ -20,7 +18,7 @@ export class Fcd implements fcd {
             httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
             timeout: 10 * 1000,
         }
-        this.fcd = axios.create({
+        this.client = axios.create({
             ...defaultConfig,
             ...config,
         })
@@ -29,18 +27,18 @@ export class Fcd implements fcd {
 
     async getContractMsgSender(hash: string, contract: string): Promise<string> {
         try {
-            const result = await this.fcd.get<FcdContractMsgSenderRes>(`${this.url}/v1/tx/${hash}`)
+            const result = await this.client.get<FcdContractMsgSenderRes>(`${this.url}/v1/tx/${hash}`)
             let sender: string;
             let found = false;
-            for (let i = 0; i < result.data?.tx?.body?.messages.length && !found; i++) {
-                const msg = result.data?.tx?.body?.messages[i]
+            for (let i = 0; i < result.data?.tx?.value?.msg.length && !found; i++) {
+                const msg = result.data?.tx?.value.msg[i]
                 // maybe this msg execute the contract
-                if (!found && msg["@type"]?.includes("Contract")) {
-                    sender = msg.sender
+                if (!found && msg["type"]?.includes("Contract")) {
+                    sender = msg.value.sender
                 }
                 // contract direct msg
-                if (msg.contract === contract) {
-                    sender = msg.sender
+                if (msg.value.contract === contract) {
+                    sender = msg.value.sender
                     found = true
                 }
             }

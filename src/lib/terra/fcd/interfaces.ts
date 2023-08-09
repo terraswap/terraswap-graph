@@ -4,11 +4,13 @@ export interface fcd {
 
 export interface FcdContractMsgSenderRes {
   tx: {
-    body: {
-      messages: {
-        '@type': string
-        sender: string
-        contract?: string
+    value: {
+      msg: {
+        'type': string
+        value: {
+          sender: string
+          contract?: string
+        }
       }[]
     }
   }

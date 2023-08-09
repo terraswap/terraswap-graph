@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import * as http from 'http';
 import * as https from 'https';
 import { isNative } from 'lib/utils';
@@ -6,24 +6,19 @@ import { Lcd, LcdContractMsgSenderRes, PoolInfo, TokenInfo } from './interfaces'
 
 
 export class Terra2Lcd implements Lcd {
-    private lcdUrl = process.env.TERRA_LCD || 'https://phoenix-lcd.terra.dev'
     private assetInfoUrl = "https://assets.terra.money/ibc/tokens.json"
-
-    private client = axios.create({
-        httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
-        httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
-        timeout: 2 * 1000,
-    })
+    private url = process.env.TERRA_LCD || 'https://phoenix-lcd.terra.dev'
+    private client: AxiosInstance
 
     constructor(url?: string, config?: AxiosRequestConfig) {
         if (url) {
-            this.lcdUrl = url
+            this.url = url
         }
         const defaultConfig = {
-            baseURL: this.lcdUrl,
+            baseURL: this.url,
             httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
             httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
-            timeout: 2 * 1000,
+            timeout: 10 * 1000,
         }
         this.client = axios.create({
             ...defaultConfig,
@@ -34,7 +29,7 @@ export class Terra2Lcd implements Lcd {
 
     async getLatestBlockHeight(): Promise<number> {
         try {
-            const res = await this.client.get(`${this.lcdUrl}/cosmos/base/tendermint/v1beta1/blocks/latest`)
+            const res = await this.client.get(`${this.url}/cosmos/base/tendermint/v1beta1/blocks/latest`)
             return parseInt(res.data.block.header.height)
         } catch (err) {
             return await this.getLatestBlockHeightLegacy()
@@ -53,7 +48,7 @@ export class Terra2Lcd implements Lcd {
         }
 
         const query_data = Buffer.from('{"pool":{}}').toString("base64")
-        const result = await this.client.get(`${this.lcdUrl}/cosmwasm/wasm/v1/contract/${address}/smart/${query_data}`, {
+        const result = await this.client.get(`${this.url}/cosmwasm/wasm/v1/contract/${address}/smart/${query_data}`, {
             headers
         })
         return result.data?.data
@@ -61,7 +56,7 @@ export class Terra2Lcd implements Lcd {
 
     async getContractMsgSender(hash: string, contract: string): Promise<string> {
         try {
-            const result = await this.client.get<LcdContractMsgSenderRes>(`${this.lcdUrl}/cosmos/tx/v1beta1/txs/${hash}`)
+            const result = await this.client.get<LcdContractMsgSenderRes>(`${this.url}/cosmos/tx/v1beta1/txs/${hash}`)
             let sender: string;
             let found = false;
             for (let i = 0; i < result.data?.tx?.body?.messages.length && !found; i++) {
@@ -90,7 +85,7 @@ export class Terra2Lcd implements Lcd {
 
     private async getLatestBlockHeightLegacy(): Promise<number> {
         try {
-            const res = await this.client.get(`${this.lcdUrl}/blocks/latest`)
+            const res = await this.client.get(`${this.url}/blocks/latest`)
             return parseInt(res.data.block.header.height)
         } catch (err) {
             throw new Error(`latestBlockHeight: ${err}`)
@@ -115,7 +110,7 @@ export class Terra2Lcd implements Lcd {
 
     private async getCw20Info(address: string): Promise<TokenInfo> {
         const query_data = Buffer.from('{"token_info":{}}').toString("base64")
-        const result = await this.client.get(`${this.lcdUrl}/cosmwasm/wasm/v1/contract/${address}/smart/${query_data}`)
+        const result = await this.client.get(`${this.url}/cosmwasm/wasm/v1/contract/${address}/smart/${query_data}`)
         return result.data?.data
     }
 }
