@@ -1,4 +1,5 @@
 import { LogFinderRule } from '@terra-money/log-finder'
+import { isClassic, isColumbus4 } from 'lib/terra'
 import { COLUMBUS_5_COSMWASM_UPDATE_HEIGHT } from 'lib/terra/consts'
 
 
@@ -230,7 +231,7 @@ const columbus4 = {
   nativeTransferRule: col4SortedNativeTransferRule,
 }
 
-const target = process.env.TERRA_CHAIN_ID?.includes("phoenix") ? phoenix : process.env.TERRA_CHAIN_ID?.includes("columbus-4") ? columbus4 : classic
+const target = !isClassic ? phoenix : isColumbus4 ? columbus4 : classic
 
 export default {
   createPairRule: target.createPairRule,
@@ -238,6 +239,6 @@ export default {
   nonnativeTransferRule: target.nonnativeTransferRule,
   nativeTransferRule: target.nativeTransferRule,
   isParsable: (type: string): boolean => {
-    return (type === 'transfer') || (process.env.TERRA_CHAIN_ID?.includes("columbus-4") ? type === 'from_contract' : type === 'wasm')
+    return (type === 'transfer') || (isColumbus4 ? type === 'from_contract' : type === 'wasm')
   }
 }

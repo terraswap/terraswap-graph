@@ -35,4 +35,8 @@ export class TxHistoryEntity {
 
   @Column('decimal', { precision: 40 })
   token1Amount: string
+
+  @Column()
+  @Index()
+  sender: string
 }

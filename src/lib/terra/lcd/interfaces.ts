@@ -13,4 +13,21 @@ export interface Lcd {
   getLatestBlockHeight(): Promise<number>
   getTokenInfo(address: string): Promise<TokenInfo>
   getPoolInfo(address: string, height?: number): Promise<PoolInfo>
+  getContractMsgSender(hash: string, contract: string): Promise<string>
+}
+
+export interface LcdContractMsgSenderRes {
+  tx: {
+    body: {
+      messages: {
+        '@type': string
+        sender: string
+        contract?: string
+      }[]
+    }
+  }
+  tx_response: {
+    height: string
+    txhash: string
+  }
 }

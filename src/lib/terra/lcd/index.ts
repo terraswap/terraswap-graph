@@ -1,6 +1,7 @@
+import { isClassic } from ".."
 import { ClassicLcd } from "./classic"
 import { Lcd } from "./interfaces"
-import { Terra2Lcd } from "./terra2"
+import { MainnetLcd } from "./mainnet"
 
-const target: Lcd = process.env.TERRA_CHAIN_ID.includes("columbus") ? new ClassicLcd() : new Terra2Lcd()
+const target: Lcd = isClassic ? new ClassicLcd() : new MainnetLcd()
 export default target

@@ -1,6 +1,7 @@
+import { isClassic } from ".."
 import { ClassicOracle } from "./classic"
 import { Oracle } from "./interfaces"
-import { Terra2Oracle } from "./terra2"
+import { MainnetOracle } from "./mainnet"
 
-const target: Oracle = process.env.TERRA_CHAIN_ID.includes("columbus") ? new ClassicOracle() : new Terra2Oracle()
+const target: Oracle = isClassic ? new ClassicOracle() : new MainnetOracle()
 export default target

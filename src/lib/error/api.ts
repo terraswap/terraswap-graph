@@ -54,7 +54,7 @@ export function apiErrorHandler(
   return async (ctx: Koa.Context, next: Koa.Next): Promise<void> => {
     try {
       await next()
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof APIError) {
         callback(ctx, error.type, +error.code, error.message)
       } else if (error.isJoi) {

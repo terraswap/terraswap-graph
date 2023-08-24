@@ -5,7 +5,7 @@ import axios, { Axios } from "axios";
 import { ExchangeRate } from "types";
 import { Oracle } from "./interfaces";
 
-export class Terra2Oracle implements Oracle {
+export class MainnetOracle implements Oracle {
     private readonly USX_ADDR = process.env.STABLE_COIN_ADDR;
     private axios: Axios;
     constructor(lcdUrl = process.env.TERRA_LCD) {

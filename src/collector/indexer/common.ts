@@ -24,7 +24,7 @@ export async function getTokenPriceAsUST(
   if (isClassic) {
     return await _classicTokenPrice(manager, token, timestamp, exchangeRate)
   }
-  return await _terra2TokenPrice(manager, token, timestamp)
+  return await _mainnetTokenPrice(manager, token, timestamp)
 }
 
 async function _classicTokenPrice(manager: EntityManager,
@@ -98,7 +98,7 @@ async function _classicTokenPrice(manager: EntityManager,
   return price[token]
 }
 
-async function _terra2TokenPrice(manager: EntityManager,
+async function _mainnetTokenPrice(manager: EntityManager,
   token: string,
   timestamp: Date,
 ): Promise<UstPrice> {
