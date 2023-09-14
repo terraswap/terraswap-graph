@@ -4,6 +4,11 @@ import * as https from 'https';
 import { isNative } from 'lib/utils';
 import { Lcd, LcdContractMsgSenderRes, PoolInfo, TokenInfo } from './interfaces';
 
+
+const TERRA_CLASSIC = {
+  LATEST_BLOCK_PATH_CHANGED_HEIGHT: 14510908
+}
+
 export class ClassicLcd implements Lcd {
   private url = process.env.TERRA_LCD || 'https://columbus-lcd.terra.dev'
   private client: AxiosInstance
@@ -25,9 +30,10 @@ export class ClassicLcd implements Lcd {
   }
 
 
-  async getLatestBlockHeight(): Promise<number> {
+  async getLatestBlockHeight(currentHeight?: number): Promise<number> {
     try {
-      const res = await this.client.get(`${this.url}/blocks/latest`)
+      const path = (currentHeight && currentHeight + 1 < TERRA_CLASSIC.LATEST_BLOCK_PATH_CHANGED_HEIGHT) ? `blocks/latest` : `cosmos/base/tendermint/v1beta1/blocks/latest`
+      const res = await this.client.get(`${this.url}/${path}`)
       return parseInt(res.data.block.header.height)
     } catch (err) {
       throw new Error(`latestBlockHeight: ${err}`)

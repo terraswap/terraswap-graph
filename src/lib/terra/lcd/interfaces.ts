@@ -10,7 +10,7 @@ export interface PoolInfo {
   total_share: string
 }
 export interface Lcd {
-  getLatestBlockHeight(): Promise<number>
+  getLatestBlockHeight(currentHeight?: number): Promise<number>
   getTokenInfo(address: string): Promise<TokenInfo>
   getPoolInfo(address: string, height?: number): Promise<PoolInfo>
   getContractMsgSender(hash: string, contract: string): Promise<string>
