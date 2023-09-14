@@ -18,14 +18,13 @@ export async function collect(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
+  const collectedBlock = await getCollectedBlock()
+  const lastHeight = collectedBlock.height
+
   //latest Height or end Height
-  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight()
+  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight(lastHeight)
 
   if (!latestBlock) return
-
-  const collectedBlock = await getCollectedBlock()
-
-  const lastHeight = collectedBlock.height
 
   // initial exchange rate
   let exchangeRate = await oracle.getExchangeRate(lastHeight - (lastHeight % 100))
