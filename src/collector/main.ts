@@ -17,8 +17,8 @@ async function loop(
   pairList: Record<string, boolean>,
   tokenList: Record<string, boolean>
 ): Promise<void> {
-  const MAX_EXPONENTIAL_FACTOR = 10
-  let delay = 500
+  const MAX_EXPONENTIAL_FACTOR = 2
+  const delay = 500
   let errCount = 0
   for (; ;) {
     try {
@@ -26,10 +26,12 @@ async function loop(
       errCount = 0
     } catch (err: any) {
       errorHandlerWithSentry(err)
-      errCount = errCount + 1 > MAX_EXPONENTIAL_FACTOR ? 0 : errCount + 1
+      errCount++
     }
-    delay = delay * 2 ** errCount
-    await bluebird.delay(delay)
+    if (errCount > MAX_EXPONENTIAL_FACTOR) {
+      throw new Error("Too many errors, exiting...")
+    }
+    await bluebird.delay(delay * 2 ** errCount)
   }
 }
 

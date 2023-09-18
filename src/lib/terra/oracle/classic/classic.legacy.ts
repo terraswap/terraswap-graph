@@ -1,12 +1,12 @@
 import { delay } from 'bluebird'
 import { num } from 'lib/num'
 import { ExchangeRate } from 'types'
-import { Oracle } from './interfaces'
+import { Oracle } from '../interfaces'
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
 import * as http from 'http';
 import * as https from 'https';
 
-export class ClassicOracle implements Oracle {
+export class ClassicLegacyOracle implements Oracle {
   private url = process.env.TERRA_LCD ?? "http://localhost:1317"
   private client: AxiosInstance
 
@@ -27,25 +27,20 @@ export class ClassicOracle implements Oracle {
   }
 
   async getExchangeRate(height: number): Promise<ExchangeRate> {
-    let headers: AxiosRequestHeaders = {}
-    if (height) {
-      headers = {
-        'x-cosmos-block-height': `${height}`,
-      }
-    }
+    let tryCount = 5;
+    let index = 0
     if (Number(process.env.START_BLOCK_HEIGHT) + 100 > height) height += 100
-    let res = await this.getFromLCD('/terra/oracle/v1beta1/denoms/exchange_rates', headers)
-    if (res && !res.result) {
-      let index = 1
-      while (!res.result) {
-        headers['x-cosmos-block-height'] = `${(height - index * 100)}`
-        res = await this.getFromLCD(
-          '/terra/oracle/v1beta1/denoms/exchange_rates', headers
-        )
-        index++
+    while (tryCount) {
+      const res = await this.getFromLCD(
+        '/oracle/denoms/exchange_rates?height=' + (height - index * 100).toString()
+      )
+      if (res?.result) {
+        return res
       }
+      index++
+      tryCount--
     }
-    return res
+    throw new Error('Failed to get exchange rate')
   }
 
   async exchangeRateToUSX(

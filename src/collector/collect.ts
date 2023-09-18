@@ -22,7 +22,7 @@ export async function collect(
   const lastHeight = collectedBlock.height
 
   //latest Height or end Height
-  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight(lastHeight)
+  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight()
 
   if (!latestBlock) return
 
