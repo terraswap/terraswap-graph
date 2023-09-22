@@ -1,29 +1,16 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import * as http from 'http';
-import * as https from 'https';
+import { AxiosInstance } from 'axios'
 import { isNative } from 'lib/utils';
 import { Lcd, LcdContractMsgSenderRes, PoolInfo, TokenInfo } from '../interfaces';
 
 export class ClassicCosmos46Lcd implements Lcd {
-  private url = process.env.TERRA_LCD || 'https://columbus-lcd.terra.dev'
+  static version = /^v0\.4[6-9]\.\d+/
+  private url;
   private client: AxiosInstance
 
-  constructor(url?: string, config?: AxiosRequestConfig) {
-    if (url) {
-      this.url = url
-    }
-    const defaultConfig = {
-      baseURL: this.url,
-      httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
-      timeout: 10 * 1000,
-    }
-    this.client = axios.create({
-      ...defaultConfig,
-      ...config,
-    })
+  constructor(client: AxiosInstance) {
+    this.url = client.defaults.baseURL
+    this.client = client
   }
-
 
   async getLatestBlockHeight(): Promise<number> {
     try {

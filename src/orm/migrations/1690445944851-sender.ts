@@ -1,7 +1,8 @@
+import axios from 'axios';
 import { isClassic } from 'lib/terra';
 import { ClassicFcd } from 'lib/terra/fcd/classic';
 import { MainnetFcd } from 'lib/terra/fcd/mainnet';
-import { ClassicLcd } from 'lib/terra/lcd/classic';
+import { ClassicCosmos46Lcd } from 'lib/terra/lcd/classic/classic.cosmos46';
 import { MainnetLcd } from 'lib/terra/lcd/mainnet';
 import { MigrationInterface, QueryRunner } from "typeorm";
 
@@ -61,9 +62,9 @@ export class sender1690445944851 implements MigrationInterface {
                 lastId = txs[txs.length - 1].id;
                 const target = isClassic ? terraApi.classic : terraApi.mainnet;
                 const clients = isClassic ? [
-                    new ClassicFcd(target.limited.fcd), new ClassicLcd(target.limited.lcd), new ClassicLcd(target.nonLimited.lcd)
+                    new ClassicFcd(target.limited.fcd), new ClassicCosmos46Lcd(axios.create({ baseURL: target.limited.lcd })), new ClassicCosmos46Lcd(axios.create({ baseURL: target.nonLimited.lcd }))
                 ] : [
-                    new MainnetFcd(target.limited.fcd), new MainnetLcd(target.limited.lcd), new MainnetLcd(target.nonLimited.lcd)
+                    new MainnetFcd(target.limited.fcd), new MainnetLcd(axios.create({ baseURL: target.limited.lcd })), new MainnetLcd(axios.create({ baseURL: target.nonLimited.lcd }))
                 ];
                 const resPromises = txs.map(async (tx, txIdx) => {
                     if (txIdx % 10 === 0) {

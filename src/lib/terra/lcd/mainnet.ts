@@ -1,6 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import * as http from 'http';
-import * as https from 'https';
+import { AxiosInstance, AxiosResponse } from 'axios'
 import { isNative } from 'lib/utils';
 import { Lcd, LcdContractMsgSenderRes, PoolInfo, TokenInfo } from './interfaces';
 
@@ -10,20 +8,9 @@ export class MainnetLcd implements Lcd {
     private url = process.env.TERRA_LCD || 'https://phoenix-lcd.terra.dev'
     private client: AxiosInstance
 
-    constructor(url?: string, config?: AxiosRequestConfig) {
-        if (url) {
-            this.url = url
-        }
-        const defaultConfig = {
-            baseURL: this.url,
-            httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
-            httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
-            timeout: 10 * 1000,
-        }
-        this.client = axios.create({
-            ...defaultConfig,
-            ...config,
-        })
+    constructor(client: AxiosInstance) {
+        this.url = client.defaults.baseURL || this.url
+        this.client = client
     }
 
 

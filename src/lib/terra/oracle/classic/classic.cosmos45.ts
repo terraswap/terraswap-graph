@@ -2,28 +2,16 @@ import { delay } from 'bluebird'
 import { num } from 'lib/num'
 import { ExchangeRate } from 'types'
 import { Oracle } from '../interfaces'
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
-import * as http from 'http';
-import * as https from 'https';
+import { AxiosInstance, AxiosRequestHeaders } from 'axios'
 
-export class ClassicLegacyOracle implements Oracle {
-  private url = process.env.TERRA_LCD ?? "http://localhost:1317"
+export class ClassicCosmos45Oracle implements Oracle {
+  static version = /^v0\.4[0-5]\.\d+/
+  private url = process.env.TERRA_LCD || "http://localhost:1317"
   private client: AxiosInstance
 
-  constructor(url?: string, config?: AxiosRequestConfig) {
-    if (url) {
-      this.url = url
-    }
-    const defaultConfig = {
-      baseURL: this.url,
-      httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
-      timeout: 10 * 1000,
-    }
-    this.client = axios.create({
-      ...defaultConfig,
-      ...config,
-    })
+  constructor(client: AxiosInstance) {
+    this.url = client.defaults.baseURL || this.url
+    this.client = client
   }
 
   async getExchangeRate(height: number): Promise<ExchangeRate> {

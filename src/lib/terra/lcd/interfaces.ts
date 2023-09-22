@@ -31,3 +31,20 @@ export interface LcdContractMsgSenderRes {
     txhash: string
   }
 }
+export interface NodeInfoResponse {
+  default_node_info?: any
+  application_version: {
+    name?: string
+    app_name?: string
+    version?: string
+    git_commit?: string
+    build_tags?: string
+    go_version?: string
+    build_deps?: {
+      path: string
+      version: string
+      sum: string
+    }[]
+    cosmos_sdk_version?: string
+  }
+}

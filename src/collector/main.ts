@@ -5,10 +5,15 @@ import { init as initErrorHandler, errorHandlerWithSentry } from 'lib/error'
 import * as logger from 'lib/logger'
 import { validateConfig } from 'config'
 import { collect } from './collect'
-import config from 'config'
+import * as http from 'http'
+import * as https from 'https'
 import { getManager } from 'typeorm'
 import { getPairList, getTokenList } from './indexer/common'
 import initRpc from 'lib/terra/rpc'
+import initLcd from 'lib/terra/lcd'
+import initOracle from 'lib/terra/oracle'
+import axios, { AxiosInstance } from 'axios'
+
 
 bluebird.config({ longStackTraces: true, warnings: { wForgottenReturn: false } })
 global.Promise = bluebird as any // eslint-disable-line
@@ -36,7 +41,7 @@ async function loop(
 }
 
 async function main(): Promise<void> {
-  logger.info(`Initialize collector, start_block_height: ${config.START_BLOCK_HEIGHT}`)
+  logger.info(`Initialize collector`)
 
   initErrorHandler({ sentryDsn: process.env.SENTRY_DSN })
 
@@ -45,6 +50,15 @@ async function main(): Promise<void> {
   await initORM()
 
   initRpc(process.env.TERRA_RPC)
+
+  const httpClient: AxiosInstance = axios.create({
+    baseURL: process.env.TERRA_LCD,
+    httpAgent: new http.Agent({ keepAlive: true, maxTotalSockets: 5, keepAliveMsecs: 5 * 1000 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxTotalSockets: 5 }),
+    timeout: 10 * 1000,
+  })
+  await initOracle(httpClient)
+  await initLcd(httpClient)
 
   const manager = getManager()
 
