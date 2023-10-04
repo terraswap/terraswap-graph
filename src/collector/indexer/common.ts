@@ -5,7 +5,7 @@ import { baseCurrency } from 'lib/terraswap'
 import { PairDayDataEntity, PairHourDataEntity, PairInfoEntity, TokenInfoEntity } from 'orm'
 import { ExchangeRate } from 'types'
 import { num } from 'lib/num'
-import { lcd } from 'lib/terra'
+import { lcd } from 'lib/terra/lcd'
 
 // get token's UST price from token-UST pair that have the largest liquidity
 export async function getTokenPriceAsUST(

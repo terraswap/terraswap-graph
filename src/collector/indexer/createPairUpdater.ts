@@ -1,7 +1,7 @@
 import { EntityManager } from 'typeorm'
 import { PairInfoEntity, TokenInfoEntity } from 'orm'
 import { isTokenOrderedWell } from 'lib/utils'
-import { lcd } from 'lib/terra'
+import { lcd } from 'lib/terra/lcd'
 
 interface PairInfoTransformed {
   assets: string[]

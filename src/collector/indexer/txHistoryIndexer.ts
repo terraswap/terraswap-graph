@@ -8,7 +8,7 @@ import {
   updateVolume24h,
 } from './txHistoryUpdater'
 import { ReturningLogFinderResult } from '@terra-money/log-finder'
-import { lcd } from 'lib/terra'
+import { lcd } from 'lib/terra/lcd'
 
 
 export async function TxHistoryIndexer(
