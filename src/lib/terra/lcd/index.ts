@@ -1,7 +1,18 @@
+import * as logger from 'lib/logger'
 import { isClassic } from ".."
-import { ClassicLcd } from "./classic"
 import { Lcd } from "./interfaces"
 import { MainnetLcd } from "./mainnet"
+import initClassicLcd, { classicLcd } from './classic';
+import { AxiosInstance } from 'axios';
 
-const target: Lcd = isClassic ? new ClassicLcd() : new MainnetLcd()
-export default target
+export let lcd: Lcd;
+
+export default async function initLcd(httpClient: AxiosInstance): Promise<void> {
+    logger.info(`Initializing ${isClassic ? "classic" : "mainnet"} Lcd`)
+    if (isClassic) {
+        await initClassicLcd(httpClient)
+        lcd = classicLcd
+        return 
+    }
+    lcd = new MainnetLcd(httpClient)
+}

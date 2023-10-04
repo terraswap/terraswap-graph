@@ -1,6 +1,7 @@
 import { EntityManager, getManager } from 'typeorm'
 import { delay } from 'bluebird'
-import { getTxsByHeight, lcd, oracle } from 'lib/terra'
+import { getTxsByHeight } from 'lib/terra'
+import { lcd } from 'lib/terra/lcd'
 import { errorHandler } from 'lib/error'
 import * as logger from 'lib/logger'
 import { getCollectedBlock, updateBlock } from './block'
@@ -9,6 +10,7 @@ import { comparePairReserve } from './indexer/common'
 import { delete24hData } from './deleteOldData'
 import { BlockEntity } from '../orm'
 import { updateTerraswapData } from './indexer/transferUpdater'
+import { oracle } from 'lib/terra/oracle'
 
 const columbus4EndHeight = 4_724_000
 
@@ -22,7 +24,7 @@ export async function collect(
   const lastHeight = collectedBlock.height
 
   //latest Height or end Height
-  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight(lastHeight)
+  const latestBlock = chainId === 'columbus-4' ? columbus4EndHeight : await lcd.getLatestBlockHeight()
 
   if (!latestBlock) return
 
