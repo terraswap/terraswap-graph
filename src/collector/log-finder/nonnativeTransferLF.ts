@@ -13,6 +13,10 @@ export function createNonnativeTransferLogFinder(height?: number): ReturningLogF
       return tflokiMapper(match)
     }
 
+    if (match[5]?.key === 'tax_amount') {
+      return cremationMapper(match)
+    }
+
     return defaultMapper(match)
   })
 }
@@ -45,6 +49,32 @@ function tflokiMapper(match: Attributes): NonnativeTransferTransformed {
 }
 
 
+function cremationMapper(match: Attributes): NonnativeTransferTransformed {
+  const transformed = {
+    addresses: { from: "", to: "" },
+    assets: { token: "", amount: "" },
+  }
+  let taxAmount = "0";
+  match.forEach(m => {
+    if (m.key === "from") {
+      transformed.addresses.from = m.value
+    }
+    if (m.key === "to") {
+      transformed.addresses.to = m.value
+    }
+    if (m.key === "_contract_address" || m.key === "contract_address") {
+      transformed.assets.token = m.value
+    }
+    if (m.key === "amount") {
+      transformed.assets.amount = m.value
+    }
+    if (m.key === "tax_amount") {
+      taxAmount = m.value
+    }
+  })
+  transformed.assets.amount = num(transformed.assets.amount).minus(num(taxAmount)).toString()
+  return transformed
+}
 
 function defaultMapper(match: Attributes): NonnativeTransferTransformed {
   const transformed = {
