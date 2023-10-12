@@ -10,7 +10,7 @@ on:
       - "src/graphql/**"
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: ${{ secrets.COLLECTOR_AWS_REGION }}
   ECR_REPOSITORY: terraswap-graph
   ECS_CLUSTER: terraswap-graph
   # terra mainnet
