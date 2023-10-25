@@ -56,11 +56,23 @@ function phoenixSortedNativeTransferRule(_height?: number): LogFinderRule {
   }
 }
 
+function phoenixInitialProvideRule(): LogFinderRule {
+  return {
+    type: 'wasm',
+    attributes: [
+      ['_contract_address'],
+      ['action', (v)=> v === 'mint'],
+      ['amount'],
+      ['to']]
+    }
+}
+
 const phoenix = {
   createPairRule: phoenixCreatePairRule,
   spwRule: phoenixSPWRule,
   nonnativeTransferRule: phoenixNonnativeTransferRule,
   nativeTransferRule: phoenixSortedNativeTransferRule,
+  initialProvideRule: phoenixInitialProvideRule,
 }
 
 
@@ -161,11 +173,23 @@ function col5SortedNativeTransferRule(_height?: number): LogFinderRule {
   }
 }
 
+function col5InitialProvideRule(): LogFinderRule {
+  return {
+    type: 'wasm',
+    attributes: [
+      ['_contract_address'],
+      ['action', (v)=> v === 'mint'],
+      ['amount'],
+      ['to']]
+    }
+}
+
 const classic = {
   createPairRule: col5CreatePairRule,
   spwRule: col5CreatePairRuleSPWRule,
   nonnativeTransferRule: col5NonnativeTransferRule,
   nativeTransferRule: col5SortedNativeTransferRule,
+  initialProvideRule: col5InitialProvideRule,
 }
 
 
@@ -223,12 +247,25 @@ export function col4SortedNativeTransferRule(_height?: number): LogFinderRule {
   }
 }
 
+function col4InitialProvideRule(): LogFinderRule {
+  return {
+    type: 'wasm',
+    attributes: [
+      ['_contract_address'],
+      ['action', (v)=> v === 'mint'],
+      ['amount'],
+      ['to']]
+    }
+}
+
+
 
 const columbus4 = {
   createPairRule: col4CreatePairRule,
   spwRule: col4SpwRule,
   nonnativeTransferRule: col4NonnativeTransferRule,
   nativeTransferRule: col4SortedNativeTransferRule,
+  initialProvideRule: col4InitialProvideRule,
 }
 
 const target = !isClassic ? phoenix : isColumbus4 ? columbus4 : classic
@@ -240,5 +277,6 @@ export default {
   nativeTransferRule: target.nativeTransferRule,
   isParsable: (type: string): boolean => {
     return (type === 'transfer') || (isColumbus4 ? type === 'from_contract' : type === 'wasm')
-  }
+  },
+  initialProvideRule: target.initialProvideRule,
 }

@@ -1,9 +1,9 @@
 import { EntityManager } from 'typeorm'
 import { Tx, ExchangeRate } from 'types'
 import { generateTerraswapRow } from './txHistoryUpdater'
-import { createCreatePairLogFinders, createSPWFinder, createNativeTransferLogFinders, createNonnativeTransferLogFinder } from '../log-finder'
+import { createCreatePairLogFinders, createSPWFinder, createNativeTransferLogFinders, createNonnativeTransferLogFinder, createInitialProvideFinder } from '../log-finder'
 import { CreatePairIndexer } from './createPairIndexer'
-import { TxHistoryIndexer } from './txHistoryIndexer'
+import { InitialProvideIndexer, TxHistoryIndexer } from './txHistoryIndexer'
 import { NativeTransferIndexer, NonnativeTransferIndexer } from './transferIndexer'
 import { factoryAddress } from 'lib/terraswap/'
 import logRules from '../log-finder/log-rules'
@@ -48,8 +48,15 @@ export async function runIndexers(
           // txHistory
           const spwfLF = createSPWFinder(pairList, height)
           const spwfLogFounds = spwfLF(event)
-
-          spwfLogFounds.length > 0 && await TxHistoryIndexer(manager, exchangeRate, timestamp, txHash, spwfLogFounds)
+ 
+          if (spwfLogFounds.length > 0) {
+            // initial provide 
+            if (spwfLogFounds.find((logFound) => logFound.transformed.action === 'provide_liquidity')) {
+              const ipLogFounds = createInitialProvideFinder(pairList)(event).filter(ip=> ip.transformed)
+              await InitialProvideIndexer(manager, ipLogFounds)
+            }
+            await TxHistoryIndexer(manager, exchangeRate, timestamp, txHash, spwfLogFounds)
+          }
 
           if (event.type === "transfer") {
             event.attributes = sortNativeTransferAttributes(event.attributes)

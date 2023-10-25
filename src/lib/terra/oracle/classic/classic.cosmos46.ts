@@ -72,7 +72,7 @@ export class ClassicCosmos46Oracle implements Oracle {
             accept: 'application/json',
             ...headers
           },
-        }).catch()
+        })
         got = true
         return {
           height: headers['x-cosmos-block-height'],

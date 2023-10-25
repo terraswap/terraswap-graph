@@ -34,3 +34,17 @@ export async function TxHistoryIndexer(
     }
   }
 }
+
+
+export async function InitialProvideIndexer(
+  manager: EntityManager,
+  founds: ReturningLogFinderResult<TxHistoryTransformed>[]
+): Promise<void> {
+  for (const logFound of founds) {
+    const transformed = logFound.transformed
+    if (transformed) {
+        await updateLpTokenShare(Cycle.DAY, manager, transformed)
+        await updateLpTokenShare(Cycle.HOUR, manager, transformed)
+    }
+  }
+}
