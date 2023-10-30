@@ -51,7 +51,7 @@ export async function runIndexers(
  
           if (spwfLogFounds.length > 0) {
             // initial provide 
-            if (spwfLogFounds.find((logFound) => logFound.transformed.action === 'provide_liquidity')) {
+            if (spwfLogFounds.find((logFound) => logFound.transformed?.action === 'provide_liquidity')) {
               const ipLogFounds = createInitialProvideFinder(pairList)(event).filter(ip=> ip.transformed)
               await InitialProvideIndexer(manager, ipLogFounds)
             }
