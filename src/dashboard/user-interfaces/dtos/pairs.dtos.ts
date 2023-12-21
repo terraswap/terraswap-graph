@@ -63,24 +63,6 @@ export class PairsResponse extends PairsDto {
   @ApiResponseProperty({ example: 8 })
   token1Decimals: number
 
-  @ApiResponseProperty({ description: "Token 0's daily volume", example: '1020000000' })
-  token0Volume: string
-
-  @ApiResponseProperty({ description: "Token 1's daily volume", example: '984621790098' })
-  token1Volume: string
-
-  @ApiResponseProperty({ description: "Token 0's daily reserved", example: '62212902054' })
-  token0Reserve: string
-
-  @ApiResponseProperty({ description: "Token 1's daily reserved", example: '59120646029299' })
-  token1Reserve: string
-
-  @ApiResponseProperty({ description: 'the number of total lp shared', example: '1937579070265' })
-  totalLpTokenShare: string
-
-  @ApiResponseProperty({ example: '1020000000' })
-  volumeUst: string
-
   @ApiResponseProperty({ example: '124425804108' })
   liquidityUst: string
 
