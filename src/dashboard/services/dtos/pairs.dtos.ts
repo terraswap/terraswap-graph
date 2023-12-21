@@ -20,17 +20,6 @@ export class PairsDto {
 
   token1Decimals: number
 
-  token0Volume: string
-
-  token1Volume: string
-
-  token0Reserve: string
-
-  token1Reserve: string
-
-  totalLpTokenShare: string
-
-  volumeUst: string
 
   dailyVolumeUst?: string
 
