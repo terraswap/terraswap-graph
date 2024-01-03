@@ -13,7 +13,7 @@ export function createNonnativeTransferLogFinder(height?: number): ReturningLogF
       return tflokiMapper(match)
     }
 
-    if (match[5]?.key === 'tax_amount') {
+    if (match[5]?.key === 'tax_amount' || match[5]?.key === 'cw20_tax_amount') {
       return cremationMapper(match)
     }
 
@@ -68,7 +68,7 @@ function cremationMapper(match: Attributes): NonnativeTransferTransformed {
     if (m.key === "amount") {
       transformed.assets.amount = m.value
     }
-    if (m.key === "tax_amount") {
+    if (m.key === "tax_amount" || m.key === "cw20_tax_amount") {
       taxAmount = m.value
     }
   })
