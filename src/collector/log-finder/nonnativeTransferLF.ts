@@ -2,26 +2,56 @@ import { Attributes, createReturningLogFinder, ReturningLogFinderMapper } from '
 import { NonnativeTransferTransformed } from 'types'
 import logRules from './log-rules'
 import { num } from 'lib/num'
+import { isClassic, isColumbus4 } from 'lib/terra'
+import { ClassicFeeAppliedTokenSet } from 'lib/terraswap/classic.consts'
+
+
+const FEE_AMOUNT_KEY = 'fee_amount'
+const TAX_AMOUNT_KEY = 'tax_amount'
+const CW20_TAX_AMOUNT_KEY = 'cw20_tax_amount'
 
 export function createNonnativeTransferLogFinder(height?: number): ReturningLogFinderMapper<NonnativeTransferTransformed> {
+  if (isColumbus4) {
+    createCol4LogFinder(height)
+  }
+
+  if (isClassic) {
+    return createClassicLogFinder(height)
+  }
+
+  return createPhoenixLogFinder(height)
+}
+
+function createCol4LogFinder(height?: number) {
   return createReturningLogFinder(logRules.nonnativeTransferRule(height), (_, match) => {
-    if (match[4]?.key === 'by') {
-      return columbus4Mapper(match)
+    return columbus4Mapper(match)
+  })
+}
+
+function createClassicLogFinder(height?: number) {
+  return createReturningLogFinder(logRules.nonnativeTransferRule(height), (_, match) => {
+    const transformed = feeApplyMapper(match)
+    if (ClassicFeeAppliedTokenSet.has(transformed.assets.token)) {
+      // already applied, rollback
+      const feeAmount = match.find(m => m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY)?.value || "0"
+      transformed.assets.amount = num(transformed.assets.amount).plus(num(feeAmount)).toString()
     }
 
-    if (match[5]?.key === 'fee_amount') {
-      return tflokiMapper(match)
-    }
+    return transformed
+  })
+}
 
-    if (match[5]?.key === 'tax_amount' || match[5]?.key === 'cw20_tax_amount') {
-      return cremationMapper(match)
+function createPhoenixLogFinder(height?: number) {
+  return createReturningLogFinder(logRules.nonnativeTransferRule(height), (_, match) => {
+    if (match.find(m => m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY)) {
+      return feeApplyMapper(match)
     }
 
     return defaultMapper(match)
   })
 }
 
-function tflokiMapper(match: Attributes): NonnativeTransferTransformed {
+function feeApplyMapper(match: Attributes): NonnativeTransferTransformed {
   const transformed = {
     addresses: { from: "", to: "" },
     assets: { token: "", amount: "" },
@@ -40,7 +70,7 @@ function tflokiMapper(match: Attributes): NonnativeTransferTransformed {
     if (m.key === "amount") {
       transformed.assets.amount = m.value
     }
-    if (m.key === "fee_amount") {
+    if (m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY) {
       feeAmount = m.value
     }
   })
@@ -48,33 +78,6 @@ function tflokiMapper(match: Attributes): NonnativeTransferTransformed {
   return transformed
 }
 
-
-function cremationMapper(match: Attributes): NonnativeTransferTransformed {
-  const transformed = {
-    addresses: { from: "", to: "" },
-    assets: { token: "", amount: "" },
-  }
-  let taxAmount = "0";
-  match.forEach(m => {
-    if (m.key === "from") {
-      transformed.addresses.from = m.value
-    }
-    if (m.key === "to") {
-      transformed.addresses.to = m.value
-    }
-    if (m.key === "_contract_address" || m.key === "contract_address") {
-      transformed.assets.token = m.value
-    }
-    if (m.key === "amount") {
-      transformed.assets.amount = m.value
-    }
-    if (m.key === "tax_amount" || m.key === "cw20_tax_amount") {
-      taxAmount = m.value
-    }
-  })
-  transformed.assets.amount = num(transformed.assets.amount).minus(num(taxAmount)).toString()
-  return transformed
-}
 
 function defaultMapper(match: Attributes): NonnativeTransferTransformed {
   const transformed = {
