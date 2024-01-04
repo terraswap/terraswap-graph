@@ -3,7 +3,7 @@ import { NonnativeTransferTransformed } from 'types'
 import logRules from './log-rules'
 import { num } from 'lib/num'
 import { isClassic, isColumbus4 } from 'lib/terra'
-import { ClassicFeeAppliedTokenSet } from 'lib/terraswap/classic.consts'
+import { ClassicReceiverFeeAppliedTokenSet, ClassicReceiverFeeAppliedPairSet } from 'lib/terraswap/classic.consts'
 
 
 const FEE_AMOUNT_KEY = 'fee_amount'
@@ -31,8 +31,9 @@ function createCol4LogFinder(height?: number) {
 function createClassicLogFinder(height?: number) {
   return createReturningLogFinder(logRules.nonnativeTransferRule(height), (_, match) => {
     const transformed = feeApplyMapper(match)
-    if (ClassicFeeAppliedTokenSet.has(transformed.assets.token)) {
-      // already applied, rollback
+    if (ClassicReceiverFeeAppliedTokenSet.has(transformed.assets.token) &&
+      // if ReceiverFeeAppliedToken is transferred from the pair, the amount need to be adjusted
+      ClassicReceiverFeeAppliedPairSet.has(transformed.addresses.from)) {
       const feeAmount = match.find(m => m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY)?.value || "0"
       transformed.assets.amount = num(transformed.assets.amount).plus(num(feeAmount)).toString()
     }
