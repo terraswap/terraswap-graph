@@ -48,13 +48,11 @@ export async function runIndexers(
           // txHistory
           const spwfLF = createSPWFinder(pairList, height)
           const spwfLogFounds = spwfLF(event)
- 
+
+          const ipLogFounds = createInitialProvideFinder(pairList)(event).filter(ip => ip.transformed)
+          await InitialProvideIndexer(manager, ipLogFounds)
+
           if (spwfLogFounds.length > 0) {
-            // initial provide 
-            if (spwfLogFounds.find((logFound) => logFound.transformed?.action === 'provide_liquidity')) {
-              const ipLogFounds = createInitialProvideFinder(pairList)(event).filter(ip=> ip.transformed)
-              await InitialProvideIndexer(manager, ipLogFounds)
-            }
             await TxHistoryIndexer(manager, exchangeRate, timestamp, txHash, spwfLogFounds)
           }
 
