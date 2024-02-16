@@ -10,7 +10,7 @@ export const ClassicReceiverFeeAppliedPairSet: Set<string> = new Set([
 ])
 
 interface OddTokenHandlingInfo {
-    feeRatio: string
+    feeRate: string
     appliedHeight: number
     action: (a: string)=> boolean
 }
@@ -18,7 +18,7 @@ interface OddTokenHandlingInfo {
 const CLASSIC_BASE_TOKEN = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m"
 const APPLIED_HEIGHT = 16746830
 export const ClassicOddTokenHandlerMap: Map<string, OddTokenHandlingInfo> = new Map([[CLASSIC_BASE_TOKEN, {
-    feeRatio: "0.048",
+    feeRate: "0.048",
     appliedHeight: APPLIED_HEIGHT,
     action: (a: string) => a === "send"
 }]])

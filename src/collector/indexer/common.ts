@@ -2,7 +2,7 @@ import { EntityManager } from 'typeorm'
 import { isNative } from 'lib/utils'
 import { isClassic } from 'lib/terra'
 import { baseCurrency } from 'lib/terraswap'
-import { PairDayDataEntity, PairHourDataEntity, PairInfoEntity, TokenInfoEntity } from 'orm'
+import { PairDataEntity, PairDayDataEntity, PairHourDataEntity, PairInfoEntity, TokenInfoEntity } from 'orm'
 import { ExchangeRate } from 'types'
 import { num } from 'lib/num'
 import { lcd } from 'lib/terra/lcd'
@@ -140,7 +140,7 @@ async function _mainnetTokenPrice(manager: EntityManager,
 
   while (tokenQueue.length > 0) {
     const target = tokenQueue.shift();
-      paths.get(target)?.forEach(p => {
+    paths.get(target)?.forEach(p => {
       const other = p.assets[0].token === target ? p.assets[1].token : p.assets[0].token;
       const otherPrice = _calculatePrice(p.assets, target, price[target].price);
       if (!price[other] || num(price[other].liquidity).lt(num(p.liquidity))) {
@@ -169,7 +169,7 @@ function _calculatePrice(assets: Asset[], target: string, targetPrice: string): 
 
 export async function comparePairReserve(height: number, em: EntityManager): Promise<void> {
 
-  const compare = async (pds: PairDayDataEntity[]) => {
+  const compare = async (pds: PairDataEntity[]) => {
     const pdPromises = pds.map(async (pd) => {
       let poolInfo;
       try {
@@ -186,13 +186,13 @@ export async function comparePairReserve(height: number, em: EntityManager): Pro
       }
       const lpAmount = poolInfo.total_share
       if (pd.token0Reserve !== token0Amount) {
-        throw new Error(`pool ${pd.pair} different token_0_reserve ${pd.token0Reserve} ${token0Amount}`)
+        throw new Error(`pool ${pd.pair} different token_0(${pd.token0}) actual(${pd.token0Reserve}) expected(${token0Amount}) at height ${height}`)
       }
       if (pd.token1Reserve !== token1Amount) {
-        throw new Error(`pool ${pd.pair} different token_1_reserve ${pd.token1Reserve} ${token1Amount}`)
+        throw new Error(`pool ${pd.pair} different token_1(${pd.token1}) actual(${pd.token1Reserve}) expected(${token1Amount}) at height ${height}`)
       }
       if (pd.totalLpTokenShare !== lpAmount) {
-        throw new Error(`pool ${pd.pair} different lp ${pd.totalLpTokenShare} ${lpAmount}`)
+        throw new Error(`pool ${pd.pair} different lp actual(${pd.totalLpTokenShare}) expected(${lpAmount}) at height ${height}`)
       }
       return pd
     })

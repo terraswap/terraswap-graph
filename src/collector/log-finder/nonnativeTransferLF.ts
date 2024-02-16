@@ -40,10 +40,10 @@ function createClassicLogFinder(height?: number) {
 
     const oddTokenHandlingInfo = ClassicOddTokenHandlerMap.get(transformed.assets.token)
     if (
-      oddTokenHandlingInfo.action(match.find(m => m.key === "action")?.value) &&
-      height && height >= oddTokenHandlingInfo.appliedHeight
+      oddTokenHandlingInfo?.action(match?.find(m => m.key === "action")?.value) &&
+      height && height >= oddTokenHandlingInfo?.appliedHeight
     ) {
-      transformed.assets.amount = num(transformed.assets.amount).multipliedBy(num("1").minus(num(oddTokenHandlingInfo.feeRatio))).integerValue(BigNumber.ROUND_FLOOR).toString()
+      transformed.assets.amount = num(transformed.assets.amount).multipliedBy(num("1").minus(num(oddTokenHandlingInfo.feeRate))).integerValue(BigNumber.ROUND_FLOOR).toString()
     }
 
     return transformed
