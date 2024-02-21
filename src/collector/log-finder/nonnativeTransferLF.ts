@@ -40,6 +40,7 @@ function createClassicLogFinder(height?: number) {
 
     const oddTokenHandlingInfo = ClassicOddTokenHandlerMap.get(transformed.assets.token)
     if (
+      oddTokenHandlingInfo?.pair(transformed.addresses.to) &&
       oddTokenHandlingInfo?.action(match?.find(m => m.key === "action")?.value) &&
       height && height >= oddTokenHandlingInfo?.appliedHeight
     ) {

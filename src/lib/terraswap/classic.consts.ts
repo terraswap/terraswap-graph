@@ -12,13 +12,19 @@ export const ClassicReceiverFeeAppliedPairSet: Set<string> = new Set([
 interface OddTokenHandlingInfo {
     feeRate: string
     appliedHeight: number
-    action: (a: string)=> boolean
+    action: (a: string) => boolean
+    pair: (p: string) => boolean
 }
+
+const oddTokenAppliedPair: Set<string> = new Set([
+    "terra1ggjadsdn285f4ae9wykle5lnawna7gdk32g6dfgpev8j0hx5jkpsc7u4gn", // uluna - BASE
+])
 
 const CLASSIC_BASE_TOKEN = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m"
 const APPLIED_HEIGHT = 16746830
 export const ClassicOddTokenHandlerMap: Map<string, OddTokenHandlingInfo> = new Map([[CLASSIC_BASE_TOKEN, {
     feeRate: "0.048",
     appliedHeight: APPLIED_HEIGHT,
-    action: (a: string) => a === "send"
+    action: (a: string) => a === "send",
+    pair: (p: string) => oddTokenAppliedPair.has(p)
 }]])
