@@ -16,7 +16,7 @@ interface OddTokenHandlingInfo {
     pair: (p: string) => boolean
 }
 
-const oddTokenAppliedPair: Set<string> = new Set([
+export const ClassicOddTokenAppliedPair: Set<string> = new Set([
     "terra1ggjadsdn285f4ae9wykle5lnawna7gdk32g6dfgpev8j0hx5jkpsc7u4gn", // uluna - BASE
 ])
 
@@ -26,5 +26,5 @@ export const ClassicOddTokenHandlerMap: Map<string, OddTokenHandlingInfo> = new 
     feeRate: "0.048",
     appliedHeight: APPLIED_HEIGHT,
     action: (a: string) => a === "send",
-    pair: (p: string) => oddTokenAppliedPair.has(p)
+    pair: (p: string) => ClassicOddTokenAppliedPair.has(p)
 }]])
