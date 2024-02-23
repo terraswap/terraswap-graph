@@ -6,6 +6,7 @@ import { PairDataEntity, PairDayDataEntity, PairHourDataEntity, PairInfoEntity, 
 import { ExchangeRate } from 'types'
 import { num } from 'lib/num'
 import { lcd } from 'lib/terra/lcd'
+import { ClassicOddTokenAppliedPair } from 'lib/terraswap/classic.consts'
 
 // get token's UST price from token-UST pair that have the largest liquidity
 export async function getTokenPriceAsUST(
@@ -171,6 +172,9 @@ export async function comparePairReserve(height: number, em: EntityManager): Pro
 
   const compare = async (pds: PairDataEntity[]) => {
     const pdPromises = pds.map(async (pd) => {
+      if (validationExceptionSet.has(pd.pair)) {
+        return
+      }
       let poolInfo;
       try {
         poolInfo = await lcd.getPoolInfo(pd.pair, height)
@@ -240,6 +244,8 @@ export async function getTokenList(manager: EntityManager): Promise<Record<strin
 
   return tokenList
 }
+
+const validationExceptionSet: Set<string> = new Set(ClassicOddTokenAppliedPair)
 
 interface Asset {
   token: string
