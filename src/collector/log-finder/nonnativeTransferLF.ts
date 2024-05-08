@@ -9,6 +9,7 @@ import { ClassicReceiverFeeAppliedTokenSet, ClassicReceiverFeeAppliedPairSet, Cl
 const FEE_AMOUNT_KEY = 'fee_amount'
 const TAX_AMOUNT_KEY = 'tax_amount'
 const CW20_TAX_AMOUNT_KEY = 'cw20_tax_amount'
+const CW20_TAX_KEY = 'tax'
 
 export function createNonnativeTransferLogFinder(height?: number): ReturningLogFinderMapper<NonnativeTransferTransformed> {
   if (isColumbus4) {
@@ -80,7 +81,7 @@ function feeApplyMapper(match: Attributes): NonnativeTransferTransformed {
     if (m.key === "amount") {
       transformed.assets.amount = m.value
     }
-    if (m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY) {
+    if (m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY || m.key === CW20_TAX_KEY) {
       feeAmount = m.value
     }
   })
