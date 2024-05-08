@@ -18,6 +18,7 @@ interface OddTokenHandlingInfo {
 
 export const ClassicOddTokenAppliedPair: Set<string> = new Set([
     "terra1ggjadsdn285f4ae9wykle5lnawna7gdk32g6dfgpev8j0hx5jkpsc7u4gn", // uluna - BASE
+    "terra18f60c3xr8f4cq0u7m70gr6k8845rs4yagdtj80j8e9cyxmj7uj6shxl2e5", // uluna - CNip
 ])
 
 const CLASSIC_BASE_TOKEN = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m"
