@@ -22,6 +22,10 @@ env:
   COLUMBUS_ECS_SERVICE: columbus-terraswap-graph-graphql
   COLUMBUS_TASK_DEFINITION: columbus-terraswap-graph-graphql 
   COLUMBUS_CONTAINER_NAME: columbus-terraswap-graph-graphql
+  
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build:
@@ -36,15 +40,16 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: terraswap-graph-build
           aws-region: ${{ env.AWS_REGION }}
+          
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1.5.1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -64,11 +69,12 @@ jobs:
     environment: production
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: terraswap-graph-graphql-phoenix
           aws-region: ${{ env.AWS_REGION }}
+          
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -103,11 +109,12 @@ jobs:
     environment: production
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: terraswap-graph-graphql-columbus
           aws-region: ${{ env.AWS_REGION }}
+          
 
       - name: Login to Amazon ECR
         id: login-ecr
