@@ -35,7 +35,9 @@ function createClassicLogFinder(height?: number) {
     if (ClassicReceiverFeeAppliedTokenSet.has(transformed.assets.token) &&
       // if ReceiverFeeAppliedToken is transferred from the pair, the amount need to be adjusted
       ClassicReceiverFeeAppliedPairSet.has(transformed.addresses.from)) {
-      const feeAmount = match.find(m => m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY)?.value || "0"
+      const feeAmount = match.find(
+        m => m.key === FEE_AMOUNT_KEY || m.key === TAX_AMOUNT_KEY || m.key === CW20_TAX_AMOUNT_KEY || m.key === CW20_TAX_KEY
+      )?.value || "0"
       transformed.assets.amount = num(transformed.assets.amount).plus(num(feeAmount)).toString()
     }
 
