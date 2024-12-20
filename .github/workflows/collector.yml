@@ -105,13 +105,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment: production
+    outputs:
+      modified-registry: ${{ steps.download-task-definition.modified-registry }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: terraswap-graph-collector-columbus
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-northeast-2
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -121,6 +123,8 @@ jobs:
         id: download-task-definition
         working-directory: .
         run: |
+          modified_registry=$(echo "${{ steps.login-ecr.outputs.registry }}" | sed 's/ap-northeast-2/us-west-2/')
+          echo "modified_registry=$modified_registry" >> $GITHUB_OUTPUT
           aws ecs describe-task-definition --task-definition ${{ env.COLUMBUS_TASK_DEFINITION }} | jq '.taskDefinition' > ${{ env.COLUMBUS_TASK_DEFINITION }}.json
 
       - name: Fill in the new image ID in the Amazon ECS task definition
@@ -129,7 +133,7 @@ jobs:
         with:
           task-definition: ./${{ env.COLUMBUS_TASK_DEFINITION }}.json
           container-name: ${{ env.COLUMBUS_CONTAINER_NAME }}
-          image:  ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY}}:${{ needs.build.outputs.image-tag }}
+          image:  ${{ steps.download-task-definition.outputs.modified_registry }}/${{ env.ECR_REPOSITORY}}:${{ needs.build.outputs.image-tag }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.10
