@@ -1,14 +1,16 @@
 export const ClassicReceiverFeeAppliedTokenSet: Set<string> = new Set([
     "terra1zkhwtm4a559emekwj7z4vklzqupgjyad8ncpwvav38y5ef6g5tjse7ceus",
     "terra1naaldj58aerjvqzulrnfpeph60pjqlyp60gqryup8g4djy4cn4nqwm08c3",
-    "terra1m58hc296srr6xygrrfyu6u0e32pl8d459nfs55pmegke8zlv94rqsjz882"
+    "terra1m58hc296srr6xygrrfyu6u0e32pl8d459nfs55pmegke8zlv94rqsjz882",
+    "terra14rfnhc2aru7jp304lht3yf903necsnrt4cxd464cftsfcksw0rtsgundnt"
 ])
 
 export const ClassicReceiverFeeAppliedPairSet: Set<string> = new Set([
     "terra15ukfg2wy9xd4g8hd5nl2rdyn7arlwk4l9u6kalwmg0pew5pjlpgskydg2a",
     "terra1anwgp97zfn6zsz9t5vgtan4s09n24khx0twu3a550m4dsxj699pq8mg5yz",
     "terra17tq86waugtxrupjp3yz2fran6ghfcsdt35j257dk7tznljlkm9rq49j7ap",
-    "terra1w4hthuvkm9lakfss5m6pvsn3dsn0kt4dsyen6c3y3s93fdzd436s87f390"
+    "terra1w4hthuvkm9lakfss5m6pvsn3dsn0kt4dsyen6c3y3s93fdzd436s87f390",
+    "terra1a63458gqlpsj5pza0csr09230cljc74acygxhf04lys05nryepeqv67uzp"
 ])
 
 interface OddTokenHandlingInfo {
