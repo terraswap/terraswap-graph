@@ -22,6 +22,16 @@ export class ClassicCosmos46Lcd implements Lcd {
     }
   }
 
+  async getBlockTime(height?: number): Promise<Date> {
+    try {
+      const path = `cosmos/base/tendermint/v1beta1/blocks/${height}`
+      const res = await this.client.get(`${this.url}/${path}`)
+      return new Date(res.data.block.header.time)
+    } catch (err) {
+      throw new Error(`getBlockTime: ${err}`)
+    }
+  }
+
   async getTokenInfo(address: string): Promise<TokenInfo> {
     if (isNative(address)) {
       return {

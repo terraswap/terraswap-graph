@@ -49,7 +49,9 @@ export class ColumbusTerraswap {
         }
         const headers: AxiosRequestHeaders = {
             'Content-Type': 'application/json',
-            'x-cosmos-block-height': `${height}`
+        }
+        if (height) {
+            headers['x-cosmos-block-height'] = `${height}`
         }
         try {
             const res = await this.axios.get(`/cosmwasm/wasm/v1/contract/${contract}/smart/${data}`, { headers })

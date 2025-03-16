@@ -11,6 +11,7 @@
     "migration-gen": "node --require ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -c migration -d src/orm/migrations -n",
     "migration-revert": "node --require ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert -c migration",
     "migration-run": "node --require ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run --transaction each -c migration",
+    "overwrite": "node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/overwrite/main.ts",
     "correction": "node --stack_size=4096 --max-old-space-size=4096 -r ts-node/register/transpile-only -r tsconfig-paths/register src/adjust.ts",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --fix",
     "test": "npm test",
